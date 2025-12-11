@@ -241,9 +241,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidUrl(path)) {
-      throw new BadRequestException('Invalid URL');
-    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
       path
