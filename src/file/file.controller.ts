@@ -50,7 +50,7 @@ export class FileController {
 
   private async loadCPFile(cpBaseUrl: string, path: string) {
     if (!path.startsWith(cpBaseUrl)) {
-      throw new BadRequestException(`Invalid paramater 'path' ${path}`);
+      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
     }
 
     const file: Stream = await this.fileService.getFile(path);
@@ -121,6 +121,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidUrl(path)) {
+      throw new BadRequestException('Invalid URL');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.GOOGLE,
       path
@@ -197,6 +200,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidUrl(path)) {
+      throw new BadRequestException('Invalid URL');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AZURE,
       path
@@ -235,6 +241,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidUrl(path)) {
+      throw new BadRequestException('Invalid URL');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
       path
@@ -267,6 +276,9 @@ export class FileController {
     description: 'File deleted successfully'
   })
   async deleteFile(@Query('path') path: string): Promise<void> {
+    if (!this.isValidPath(path)) {
+      throw new BadRequestException('Invalid file path');
+    }
     await this.fileService.deleteFile(path);
   }
 
@@ -324,5 +336,21 @@ export class FileController {
       this.logger.error(err.message);
       res.status(HttpStatus.NOT_FOUND);
     }
+  }
+
+  private isValidUrl(url: string): boolean {
+    try {
+      const parsedUrl = new URL(url);
+      return ['http:', 'https:'].includes(parsedUrl.protocol);
+    } catch (err) {
+      return false;
+    }
+  }
+
+  private isValidPath(filePath: string): boolean {
+    // Ensure the path is within a specific directory
+    const basePath = path.resolve(process.cwd(), 'uploads');
+    const resolvedPath = path.resolve(basePath, filePath);
+    return resolvedPath.startsWith(basePath);
   }
 }

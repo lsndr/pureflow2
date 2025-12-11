@@ -18,6 +18,10 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
+      // Validate URL against allowed cloud provider URLs
+      if (!this.isAllowedCloudProviderUrl(file)) {
+        throw new Error('Access to the specified URL is not allowed');
+      }
       const content = await this.cloudProviders.get(file);
 
       if (content) {
@@ -32,6 +36,16 @@ export class FileService {
 
       return fs.createReadStream(file);
     }
+  }
+
+  private isAllowedCloudProviderUrl(url: string): boolean {
+    const allowedUrls = [
+      CloudProvidersMetaData.GOOGLE,
+      CloudProvidersMetaData.AZURE,
+      CloudProvidersMetaData.DIGITAL_OCEAN,
+      CloudProvidersMetaData.AWS
+    ];
+    return allowedUrls.some(allowedUrl => url.startsWith(allowedUrl));
   }
 
   async deleteFile(file: string): Promise<boolean> {
