@@ -29,6 +29,8 @@ export class FileService {
   }
 
   async deleteFile(file: string): Promise<boolean> {
+    this.logger.log(`Deleting file: ${file}`);
+
     if (!this.isPathSafe(file)) {
       throw new Error('Access to this file path is not allowed');
     }

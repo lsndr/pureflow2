@@ -37,7 +37,14 @@ import { ChatModule } from './chat/chat.module';
       driver: MercuriusDriver,
       graphiql: false, // Disable GraphiQL to prevent introspection
       autoSchemaFile: true,
-      introspection: false // Disable introspection to secure the schema
+      introspection: false, // Disable introspection to secure the schema
+      context: ({ request }) => {
+        // Add custom logic to disable introspection based on request
+        if (request.headers['x-disable-introspection'] === 'true') {
+          throw new Error('Introspection is disabled');
+        }
+        return {};
+      }
     }),
     PartnersModule,
     EmailModule,

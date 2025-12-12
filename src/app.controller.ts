@@ -90,12 +90,8 @@ export class AppController {
     const allowedDomains = ['example.com', 'another-allowed-domain.com'];
     try {
       const urlObj = new URL(url);
-      if (!allowedDomains.includes(urlObj.hostname)) {
+      if (!allowedDomains.includes(urlObj.hostname) || urlObj.search) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
-      }
-      // Ensure the URL is exactly as expected without any additional query parameters
-      if (urlObj.search) {
-        throw new HttpException('URL contains unexpected query parameters', HttpStatus.BAD_REQUEST);
       }
       return { url: urlObj.origin }; // Redirect only to the origin, ignoring path and query
     } catch (error) {
