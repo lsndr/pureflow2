@@ -121,9 +121,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidGooglePath(path)) {
-      throw new BadRequestException('Invalid Google path');
-    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.GOOGLE,
       path
@@ -186,15 +183,6 @@ export class FileController {
     return allowedPaths.some(allowedPath => path.endsWith(allowedPath));
   }
 
-  private isValidGooglePath(path: string): boolean {
-    const allowedPaths = [
-      'instance/',
-      'oslogin/',
-      'project/'
-    ];
-    return allowedPaths.some(allowedPath => path.includes(allowedPath));
-  }
-
   @Get('/azure')
   @ApiQuery({
     name: 'path',
@@ -223,9 +211,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidAzurePath(path)) {
-      throw new BadRequestException('Invalid Azure path');
-    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AZURE,
       path
@@ -234,17 +219,6 @@ export class FileController {
     res.type(type);
 
     return file;
-  }
-
-  private isValidAzurePath(path: string): boolean {
-    const allowedPaths = [
-      'compute/azEnvironment',
-      'compute/location',
-      'compute/name',
-      'compute/osType',
-      'compute/vmId'
-    ];
-    return allowedPaths.some(allowedPath => path.includes(allowedPath));
   }
 
   @Get('/digital_ocean')
@@ -275,9 +249,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidDigitalOceanPath(path)) {
-      throw new BadRequestException('Invalid Digital Ocean path');
-    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
       path
@@ -286,24 +257,6 @@ export class FileController {
     res.type(type);
 
     return file;
-  }
-
-  private isValidDigitalOceanPath(path: string): boolean {
-    const allowedPaths = [
-      'id',
-      'hostname',
-      'user-data',
-      'vendor-data',
-      'public-keys',
-      'region',
-      'interfaces/',
-      'dns/',
-      'floating_ip/',
-      'reserved_ip/',
-      'tags/',
-      'features/'
-    ];
-    return allowedPaths.some(allowedPath => path.includes(allowedPath));
   }
 
   @Delete()

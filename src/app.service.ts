@@ -57,19 +57,15 @@ export class AppService {
       ),
       dbUser = this.configService.get<string>(
         OrmModuleConfigProperties.ENV_DATABASE_USER
-      ),
-      dbPwd = this.configService.get<string>(
-        OrmModuleConfigProperties.ENV_DATABASE_PASSWORD
       );
 
+    // Do not expose sensitive information like passwords or API keys
     return {
       awsBucket: this.configService.get<string>(
         AppModuleConfigProperties.ENV_AWS_BUCKET
       ),
       sql: `postgres://${dbUser}:****@${dbHost}:${dbPort}/${dbSchema} `, // Masked password
-      googlemaps: this.configService.get<string>(
-        AppModuleConfigProperties.ENV_GOOGLE_MAPS
-      )
+      googlemaps: '****' // Masked API key
     };
   }
 
