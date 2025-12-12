@@ -15,8 +15,19 @@ export class FileService {
     return resolvedPath.startsWith(process.cwd());
   }
 
+  private sanitizePath(filePath: string): string {
+    // Remove any file URI scheme
+    if (filePath.startsWith('file://')) {
+      filePath = filePath.slice(7);
+    }
+    // Normalize the path to remove any ../ or ./
+    return path.normalize(filePath);
+  }
+
   async getFile(file: string): Promise<Stream> {
     this.logger.log(`Reading file: ${file}`);
+
+    file = this.sanitizePath(file);
 
     if (!this.isPathSafe(file)) {
       throw new Error('Access to this file path is not allowed');
@@ -30,6 +41,8 @@ export class FileService {
 
   async deleteFile(file: string): Promise<boolean> {
     this.logger.log(`Deleting file: ${file}`);
+
+    file = this.sanitizePath(file);
 
     if (!this.isPathSafe(file)) {
       throw new Error('Access to this file path is not allowed');
