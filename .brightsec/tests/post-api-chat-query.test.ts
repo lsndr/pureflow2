@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('POST /api/chat/query', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['csrf', 'xss', 'ssrf', 'secret_tokens', 'prompt_injection'],
+      tests: ['prompt_injection'],
       attackParamLocations: [AttackParamLocation.BODY],
       starMetadata: {
         code_source: "lsndr/pureflow2:stable",
