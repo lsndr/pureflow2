@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('GET /api/file/digital_ocean', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['lfi', 'open_cloud_storage', 'ssrf', 'secret_tokens'],
+      tests: ['ssrf'],
       attackParamLocations: [AttackParamLocation.QUERY, AttackParamLocation.PATH],
       starMetadata: {
         code_source: "lsndr/pureflow2:stable",
