@@ -63,15 +63,11 @@ export class FileService {
   }
 
   async deleteFile(file: string): Promise<boolean> {
-    if (file.includes('..') || path.isAbsolute(file)) {
+    if (file.includes('..') || path.isAbsolute(file) || file.startsWith('http')) {
       throw new Error('Invalid file path');
     }
-    if (file.startsWith('http')) {
-      throw new Error('cannot delete file from this location');
-    } else {
-      file = path.resolve(process.cwd(), file);
-      await fs.promises.unlink(file);
-      return true;
-    }
+    file = path.resolve(process.cwd(), file);
+    await fs.promises.unlink(file);
+    return true;
   }
 }
