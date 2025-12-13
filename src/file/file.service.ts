@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { Readable, Stream } from 'stream';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -18,6 +18,9 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
+      if (!this.isValidUrl(file)) {
+        throw new BadRequestException('Invalid URL');
+      }
       const content = await this.cloudProviders.get(file);
 
       if (content) {
@@ -34,7 +37,23 @@ export class FileService {
     }
   }
 
+  private isValidUrl(url: string): boolean {
+    try {
+      const parsedUrl = new URL(url);
+      // Allow only specific protocols and hostnames
+      const allowedProtocols = ['http:', 'https:'];
+      const allowedHostnames = ['example.com', 'another-allowed-domain.com'];
+      return allowedProtocols.includes(parsedUrl.protocol) &&
+             allowedHostnames.includes(parsedUrl.hostname);
+    } catch (err) {
+      return false;
+    }
+  }
+
   async deleteFile(file: string): Promise<boolean> {
+    if (file.includes('..')) {
+      throw new Error('Invalid file path');
+    }
     if (file.startsWith('/')) {
       throw new Error('cannot delete file from this location');
     } else if (file.startsWith('http')) {
