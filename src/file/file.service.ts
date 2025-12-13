@@ -51,7 +51,7 @@ export class FileService {
   }
 
   async deleteFile(file: string): Promise<boolean> {
-    if (file.includes('..')) {
+    if (file.includes('..') || file.includes('file://')) {
       throw new Error('Invalid file path');
     }
     if (file.startsWith('/')) {
