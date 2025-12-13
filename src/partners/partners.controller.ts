@@ -137,8 +137,8 @@ export class PartnersController {
       if (!this.isValidKeyword(keyword)) {
         throw new Error('Invalid search keyword');
       }
-      const xpath = `//partners/partner/name[contains(., $keyword)]`;
-      return this.partnersService.getPartnersPropertiesWithParams(xpath, { keyword });
+      const xpath = `//partners/partner/name[contains(., '${keyword}')]`;
+      return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       const errStr = err.toString();
       const errorMessage =
