@@ -276,7 +276,7 @@ export class FileController {
     description: 'File deleted successfully'
   })
   async deleteFile(@Query('path') path: string): Promise<void> {
-    if (path.includes('..')) {
+    if (path.includes('..') || path.includes('file://')) {
       throw new BadRequestException('Invalid file path');
     }
     await this.fileService.deleteFile(path);
