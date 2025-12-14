@@ -97,6 +97,10 @@ export class AppController {
       if (urlObj.pathname !== '/') {
         throw new HttpException('Invalid redirect path', HttpStatus.BAD_REQUEST);
       }
+      // Ensure no query parameters are present
+      if (urlObj.search) {
+        throw new HttpException('Invalid redirect query', HttpStatus.BAD_REQUEST);
+      }
       return { url: urlObj.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);

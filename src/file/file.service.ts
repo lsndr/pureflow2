@@ -35,13 +35,16 @@ export class FileService {
   }
 
   async deleteFile(file: string): Promise<boolean> {
+    // Decode URI components to handle encoded paths
+    const decodedFile = decodeURIComponent(file);
+
     // Normalize the path to prevent directory traversal
-    const normalizedPath = path.normalize(file);
+    const normalizedPath = path.normalize(decodedFile);
     const basePath = path.resolve(process.cwd());
     const fullPath = path.resolve(basePath, normalizedPath);
 
     // Ensure the resolved path is within the base directory
-    if (!fullPath.startsWith(basePath)) {
+    if (!fullPath.startsWith(basePath) || fullPath.includes('file:')) {
       throw new Error('Invalid file path');
     }
 
