@@ -18,7 +18,13 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
-      throw new Error('External URLs are not allowed');
+      const content = await this.cloudProviders.get(file);
+
+      if (content) {
+        return Readable.from(content);
+      } else {
+        throw new Error(`no such file or directory, access '${file}'`);
+      }
     } else {
       file = path.resolve(process.cwd(), file);
 
@@ -29,13 +35,20 @@ export class FileService {
   }
 
   async deleteFile(file: string): Promise<boolean> {
-    if (file.startsWith('/') || file.includes('..')) {
+    // Normalize the path to prevent directory traversal
+    const normalizedPath = path.normalize(file);
+    const basePath = path.resolve(process.cwd());
+    const fullPath = path.resolve(basePath, normalizedPath);
+
+    // Ensure the resolved path is within the base directory
+    if (!fullPath.startsWith(basePath)) {
       throw new Error('Invalid file path');
-    } else if (file.startsWith('http')) {
+    }
+
+    if (fullPath.startsWith('http')) {
       throw new Error('cannot delete file from this location');
     } else {
-      file = path.resolve(process.cwd(), file);
-      await fs.promises.unlink(file);
+      await fs.promises.unlink(fullPath);
       return true;
     }
   }
