@@ -18,13 +18,7 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
-      const content = await this.cloudProviders.get(file);
-
-      if (content) {
-        return Readable.from(content);
-      } else {
-        throw new Error(`no such file or directory, access '${file}'`);
-      }
+      throw new Error('External URLs are not allowed');
     } else {
       file = path.resolve(process.cwd(), file);
 
@@ -35,8 +29,8 @@ export class FileService {
   }
 
   async deleteFile(file: string): Promise<boolean> {
-    if (file.startsWith('/')) {
-      throw new Error('cannot delete file from this location');
+    if (file.startsWith('/') || file.includes('..')) {
+      throw new Error('Invalid file path');
     } else if (file.startsWith('http')) {
       throw new Error('cannot delete file from this location');
     } else {
