@@ -44,7 +44,7 @@ export class FileService {
     const fullPath = path.resolve(basePath, normalizedPath);
 
     // Ensure the resolved path is within the base directory
-    if (!fullPath.startsWith(basePath) || fullPath.includes('file:')) {
+    if (!fullPath.startsWith(basePath) || fullPath.includes('file:') || /\.\./.test(normalizedPath)) {
       throw new Error('Invalid file path');
     }
 

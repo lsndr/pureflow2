@@ -94,14 +94,14 @@ export class AppController {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
       // Ensure the URL path is empty to prevent open redirects
-      if (urlObj.pathname !== '/') {
+      if (urlObj.pathname !== '/' && urlObj.pathname !== '') {
         throw new HttpException('Invalid redirect path', HttpStatus.BAD_REQUEST);
       }
       // Ensure no query parameters are present
       if (urlObj.search) {
         throw new HttpException('Invalid redirect query', HttpStatus.BAD_REQUEST);
       }
-      return { url: urlObj.toString() };
+      return { url: urlObj.origin };
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
