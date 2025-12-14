@@ -41,8 +41,10 @@ export class ChatController {
     }
   }
 
-  // Simple sanitization function to remove potentially harmful content
+  // Enhanced sanitization function to prevent prompt injection
   private sanitizeInput(input: string): string {
-    return input.replace(/[^\w\s.,!?]/g, ''); // Remove any non-alphanumeric characters except basic punctuation
+    // Remove potentially harmful content and limit input length
+    const sanitized = input.replace(/[^\w\s.,!?]/g, '');
+    return sanitized.length > 200 ? sanitized.substring(0, 200) : sanitized;
   }
 }
