@@ -71,6 +71,10 @@ export class AppController {
   async renderTemplate(@Body() raw): Promise<string> {
     if (typeof raw === 'string' || Buffer.isBuffer(raw)) {
       const text = raw.toString().trim();
+      // Validate and sanitize input to prevent SSTI
+      if (!/^[a-zA-Z0-9\s]*$/.test(text)) {
+        throw new HttpException('Invalid input', HttpStatus.BAD_REQUEST);
+      }
       // Use a safe template rendering approach
       const res = dotT.template(text)({});
       this.logger.debug(`Rendered template: ${res}`);
@@ -94,7 +98,7 @@ export class AppController {
       if (!allowedDomains.includes(urlObj.hostname)) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
-      return { url };
+      return { url: urlObj.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
