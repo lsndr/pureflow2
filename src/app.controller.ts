@@ -261,7 +261,7 @@ export class AppController {
       }
     }
   })
-  async getUserInfoV2(@Param('email') email: string): Promise<UserDto> {
+  async getUserInfoV2(@Param('email') email: Promise<UserDto> {
     try {
       return await this.appService.getUserInfo(email);
     } catch (err) {
