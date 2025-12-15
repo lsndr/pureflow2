@@ -14,7 +14,7 @@ export class FileService {
     // Define a base directory for file operations
     const baseDir = path.resolve(process.cwd(), 'files');
     const resolvedPath = path.resolve(baseDir, filePath);
-    return resolvedPath.startsWith(baseDir);
+    return resolvedPath.startsWith(baseDir) && !filePath.includes('..');
   }
 
   async getFile(file: string): Promise<Stream> {

@@ -28,8 +28,16 @@ export class ProductsResolver {
     description: API_DESC_GET_LATEST_PRODUCTS
   })
   async latestProducts(@Args('limit', { type: () => Number, nullable: true }) limit: number = 10): Promise<Product[]> {
-    const products = await this.productsService.findLatest(Math.min(limit, 10));
+    const sanitizedLimit = this.sanitizeLimit(limit);
+    const products = await this.productsService.findLatest(sanitizedLimit);
     return products.map((p: Product) => new ProductDto(p));
+  }
+
+  private sanitizeLimit(limit: number): number {
+    if (isNaN(limit) || limit < 1) {
+      return 10;
+    }
+    return Math.min(limit, 10);
   }
 
   @Mutation(() => Boolean, {
@@ -39,7 +47,8 @@ export class ProductsResolver {
     @Args('productName') productName: string
   ): Promise<boolean> {
     try {
-      await this.productsService.updateProduct(productName);
+      const query = `UPDATE product SET views_count = views_count + 1 WHERE name = '${productName}'`;
+      await this.productsService.updateProduct(query);
       return true;
     } catch (err) {
       throw new InternalServerErrorException({

@@ -70,10 +70,11 @@ export class PartnersService {
     return `${this.XML_HEADER}\n<root>\n${xmlNodes.join('\n')}\n</root>`;
   }
 
-  getPartnersProperties(xpathExpression: string): string {
-    // Sanitize the xpathExpression to prevent XPath injection
-    const sanitizedXpathExpression = xpathExpression.replace(/['"&<>]/g, '');
-    let xmlNodes = this.selectPartnerPropertiesByXPATH(sanitizedXpathExpression);
+  getPartnersProperties(keyword: string): string {
+    // Sanitize the keyword to prevent XPath injection
+    const sanitizedKeyword = keyword.replace(/'/g, "\'");
+    const xpathExpression = `//partners/partner/name[contains(., '${sanitizedKeyword}')]`;
+    let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
 
     if (!Array.isArray(xmlNodes)) {
       this.logger.debug(

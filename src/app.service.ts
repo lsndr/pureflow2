@@ -67,9 +67,7 @@ export class AppService {
         AppModuleConfigProperties.ENV_AWS_BUCKET
       ),
       sql: `postgres://${dbUser}:<REDACTED>@${dbHost}:${dbPort}/${dbSchema}`,
-      googlemaps: this.configService.get<string>(
-        AppModuleConfigProperties.ENV_GOOGLE_MAPS
-      )
+      googlemaps: '<REDACTED>'
     };
   }
 
