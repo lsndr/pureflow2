@@ -34,10 +34,10 @@ export class ProductsResolver {
   }
 
   private sanitizeLimit(limit: number): number {
-    if (isNaN(limit) || limit < 1) {
+    if (typeof limit !== 'number' || isNaN(limit) || limit < 1) {
       return 10;
     }
-    return Math.min(limit, 10);
+    return Math.min(Math.floor(limit), 10);
   }
 
   @Mutation(() => Boolean, {

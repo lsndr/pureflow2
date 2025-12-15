@@ -97,7 +97,8 @@ export class AppController {
       if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
         throw new HttpException('Invalid URL protocol', HttpStatus.BAD_REQUEST);
       }
-      return { url: urlObj.toString() };
+      // Return a fixed URL to prevent open redirects
+      return { url: `https://${urlObj.hostname}` };
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }

@@ -14,28 +14,35 @@ export class FileService {
     // Define a base directory for file operations
     const baseDir = path.resolve(process.cwd(), 'files');
     const resolvedPath = path.resolve(baseDir, filePath);
-    return resolvedPath.startsWith(baseDir) && !filePath.includes('..');
+    return resolvedPath.startsWith(baseDir);
+  }
+
+  private sanitizePath(filePath: string): string {
+    // Remove any null bytes and normalize the path
+    return path.normalize(filePath.replace(/\0/g, ''));
   }
 
   async getFile(file: string): Promise<Stream> {
     this.logger.log(`Reading file: ${file}`);
 
-    if (!this.isValidPath(file)) {
+    const sanitizedPath = this.sanitizePath(file);
+    if (!this.isValidPath(sanitizedPath)) {
       throw new Error('Invalid file path');
     }
 
-    const resolvedPath = path.resolve(process.cwd(), file);
+    const resolvedPath = path.resolve(process.cwd(), sanitizedPath);
     await fs.promises.access(resolvedPath, R_OK);
 
     return fs.createReadStream(resolvedPath);
   }
 
   async deleteFile(file: string): Promise<boolean> {
-    if (!this.isValidPath(file)) {
+    const sanitizedPath = this.sanitizePath(file);
+    if (!this.isValidPath(sanitizedPath)) {
       throw new Error('Invalid file path');
     }
 
-    const resolvedPath = path.resolve(process.cwd(), file);
+    const resolvedPath = path.resolve(process.cwd(), sanitizedPath);
     await fs.promises.unlink(resolvedPath);
     return true;
   }
