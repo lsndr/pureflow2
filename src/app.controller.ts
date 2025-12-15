@@ -90,7 +90,7 @@ export class AppController {
     const allowedDomains = ['example.com', 'another-allowed-domain.com'];
     try {
       const urlObj = new URL(url);
-      if (!allowedDomains.includes(urlObj.hostname)) {
+      if (!allowedDomains.includes(urlObj.hostname) || urlObj.search) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
       // Ensure the URL is exactly as expected

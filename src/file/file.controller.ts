@@ -123,8 +123,12 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    const parsedUrl = url.parse(path);
+    if (!parsedUrl.hostname || !parsedUrl.hostname.endsWith('googleusercontent.com')) {
+      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
+    }
     const file: Stream = await this.loadCPFile(
-      'google.internal',
+      'googleusercontent.com',
       path
     );
     const type = this.getContentType(contentType);
@@ -161,6 +165,10 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    const parsedUrl = url.parse(path);
+    if (!parsedUrl.hostname || !parsedUrl.hostname.endsWith('amazonaws.com')) {
+      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
+    }
     const file: Stream = await this.loadCPFile(
       'amazonaws.com',
       path
@@ -199,6 +207,10 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    const parsedUrl = url.parse(path);
+    if (!parsedUrl.hostname || !parsedUrl.hostname.endsWith('azure.com')) {
+      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
+    }
     const file: Stream = await this.loadCPFile(
       'azure.com',
       path
@@ -237,6 +249,10 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    const parsedUrl = url.parse(path);
+    if (!parsedUrl.hostname || !parsedUrl.hostname.endsWith('digitaloceanspaces.com')) {
+      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
+    }
     const file: Stream = await this.loadCPFile(
       'digitaloceanspaces.com',
       path
