@@ -32,6 +32,7 @@ import {
   SWAGGER_DESC_SAVE_RAW_CONTENT
 } from './file.controller.swagger.desc';
 import { CloudProvidersMetaData } from './cloud.providers.metadata';
+import * as url from 'url';
 
 @Controller('/api/file')
 @ApiTags('Files controller')
@@ -49,7 +50,8 @@ export class FileController {
   }
 
   private async loadCPFile(cpBaseUrl: string, path: string) {
-    if (!path.startsWith(cpBaseUrl)) {
+    const parsedUrl = url.parse(path);
+    if (!parsedUrl.hostname || !parsedUrl.hostname.endsWith(cpBaseUrl)) {
       throw new BadRequestException(`Invalid parameter 'path' ${path}`);
     }
 
@@ -121,11 +123,8 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!path.startsWith(CloudProvidersMetaData.GOOGLE)) {
-      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
-    }
     const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.GOOGLE,
+      'google.internal',
       path
     );
     const type = this.getContentType(contentType);
@@ -162,11 +161,8 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!path.startsWith(CloudProvidersMetaData.AWS)) {
-      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
-    }
     const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.AWS,
+      'amazonaws.com',
       path
     );
     const type = this.getContentType(contentType);
@@ -203,11 +199,8 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!path.startsWith(CloudProvidersMetaData.AZURE)) {
-      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
-    }
     const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.AZURE,
+      'azure.com',
       path
     );
     const type = this.getContentType(contentType);
@@ -244,11 +237,8 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!path.startsWith(CloudProvidersMetaData.DIGITAL_OCEAN)) {
-      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
-    }
     const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.DIGITAL_OCEAN,
+      'digitaloceanspaces.com',
       path
     );
     const type = this.getContentType(contentType);
