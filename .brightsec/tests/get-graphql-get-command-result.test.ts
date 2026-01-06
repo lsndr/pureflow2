@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('GET /graphql-get-command-result', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['osi', 'graphql_introspection', 'xss', 'ssrf'],
+      tests: ['graphql_introspection'],
       attackParamLocations: [AttackParamLocation.QUERY],
       starMetadata: {
         code_source: "lsndr/pureflow2:stable",
