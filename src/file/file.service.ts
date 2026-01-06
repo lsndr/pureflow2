@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import { Readable, Stream } from 'stream';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -18,13 +18,7 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
-      const content = await this.cloudProviders.get(file);
-
-      if (content) {
-        return Readable.from(content);
-      } else {
-        throw new Error(`no such file or directory, access '${file}'`);
-      }
+      throw new Error('Accessing files via HTTP is not allowed.');
     } else {
       file = path.resolve(process.cwd(), file);
 
@@ -35,14 +29,19 @@ export class FileService {
   }
 
   async deleteFile(file: string): Promise<boolean> {
-    if (file.startsWith('/')) {
-      throw new Error('cannot delete file from this location');
-    } else if (file.startsWith('http')) {
-      throw new Error('cannot delete file from this location');
-    } else {
-      file = path.resolve(process.cwd(), file);
-      await fs.promises.unlink(file);
-      return true;
+    try {
+      if (file.startsWith('/')) {
+        throw new Error('cannot delete file from this location');
+      } else if (file.startsWith('http')) {
+        throw new Error('cannot delete file from this location');
+      } else {
+        file = path.resolve(process.cwd(), file);
+        await fs.promises.unlink(file);
+        return true;
+      }
+    } catch (error) {
+      this.logger.error(`Failed to delete file: ${error.message}`);
+      throw new InternalServerErrorException('An error occurred while deleting the file.');
     }
   }
 }
