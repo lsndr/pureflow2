@@ -39,8 +39,10 @@ export class ChatController {
   }
 
   private sanitizeMessage(message: ChatMessage): ChatMessage {
-    // Basic sanitization logic to prevent prompt injection
-    const sanitizedContent = message.content.replace(/[^a-zA-Z0-9 .,!?]/g, '');
+    // Enhanced sanitization logic to prevent prompt injection
+    const sanitizedContent = message.content
+      .replace(/[^\w\s.,!?]/g, '') // Remove special characters
+      .replace(/(\b(?:napalm|explosive|bomb)\b)/gi, '[REDACTED]'); // Redact sensitive terms
     return { ...message, content: sanitizedContent };
   }
 }

@@ -18,7 +18,13 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
-      throw new Error('Accessing files via HTTP is not allowed.');
+      const content = await this.cloudProviders.get(file);
+
+      if (content) {
+        return Readable.from(content);
+      } else {
+        throw new Error(`no such file or directory, access '${file}'`);
+      }
     } else {
       file = path.resolve(process.cwd(), file);
 
