@@ -1,4 +1,4 @@
-import { Controller, Logger, Post, Query } from '@nestjs/common';
+import { Controller, Logger, Post, Query, BadRequestException } from '@nestjs/common';
 import {
   ApiCreatedResponse,
   ApiOperation,
@@ -25,7 +25,15 @@ export class SubscriptionsController {
     description: 'Returns subscribed email'
   })
   async subscribe(@Query('email') email: string): Promise<string> {
+    if (!this.isValidEmail(email)) {
+      throw new BadRequestException('Invalid email address');
+    }
     this.logger.log(`Subscribed with email ${email}`);
     return email;
+  }
+
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    return emailRegex.test(email);
   }
 }

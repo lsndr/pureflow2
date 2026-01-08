@@ -50,7 +50,7 @@ export class FileController {
 
   private async loadCPFile(cpBaseUrl: string, path: string) {
     if (!path.startsWith(cpBaseUrl)) {
-      throw new BadRequestException(`Invalid paramater 'path' ${path}`);
+      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
     }
 
     const file: Stream = await this.fileService.getFile(path);
@@ -121,6 +121,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidGooglePath(path)) {
+      throw new BadRequestException('Invalid Google path');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.GOOGLE,
       path
@@ -159,6 +162,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidAwsPath(path)) {
+      throw new BadRequestException('Invalid AWS path');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AWS,
       path
@@ -167,6 +173,36 @@ export class FileController {
     res.type(type);
 
     return file;
+  }
+
+  private isValidAwsPath(path: string): boolean {
+    const allowedPaths = [
+      'ami-id',
+      'ami-launch-index',
+      'ami-manifest-path',
+      'block-device-mapping/',
+      'events/',
+      'hostname',
+      'iam/',
+      'instance-action',
+      'instance-id',
+      'instance-life-cycle',
+      'instance-type',
+      'local-hostname',
+      'local-ipv4',
+      'mac',
+      'metrics/',
+      'network/',
+      'placement/',
+      'profile',
+      'public-hostname',
+      'public-ipv4',
+      'public-keys/',
+      'reservation-id',
+      'security-groups',
+      'services/'
+    ];
+    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
   }
 
   @Get('/azure')
@@ -197,6 +233,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidAzurePath(path)) {
+      throw new BadRequestException('Invalid Azure path');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AZURE,
       path
@@ -205,6 +244,15 @@ export class FileController {
     res.type(type);
 
     return file;
+  }
+
+  private isValidAzurePath(path: string): boolean {
+    const allowedPaths = [
+      'config/products/',
+      'images/',
+      'documents/'
+    ];
+    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
   }
 
   @Get('/digital_ocean')
@@ -235,6 +283,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidDigitalOceanPath(path)) {
+      throw new BadRequestException('Invalid Digital Ocean path');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
       path
@@ -243,6 +294,24 @@ export class FileController {
     res.type(type);
 
     return file;
+  }
+
+  private isValidDigitalOceanPath(path: string): boolean {
+    const allowedPaths = [
+      'id',
+      'hostname',
+      'user-data',
+      'vendor-data',
+      'public-keys',
+      'region',
+      'interfaces/',
+      'dns/',
+      'floating_ip/',
+      'reserved_ip/',
+      'tags/',
+      'features/'
+    ];
+    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
   }
 
   @Delete()
@@ -267,7 +336,12 @@ export class FileController {
     description: 'File deleted successfully'
   })
   async deleteFile(@Query('path') path: string): Promise<void> {
-    await this.fileService.deleteFile(path);
+    try {
+      await this.fileService.deleteFile(path);
+    } catch (err) {
+      this.logger.error(err.message);
+      throw new Error('An error occurred while deleting the file.');
+    }
   }
 
   @Put('raw')
@@ -324,5 +398,14 @@ export class FileController {
       this.logger.error(err.message);
       res.status(HttpStatus.NOT_FOUND);
     }
+  }
+
+  private isValidGooglePath(path: string): boolean {
+    const allowedPaths = [
+      'instance/',
+      'oslogin/',
+      'project/'
+    ];
+    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
   }
 }
