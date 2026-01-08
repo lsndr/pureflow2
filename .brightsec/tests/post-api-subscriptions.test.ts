@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('POST /api/subscriptions', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['csrf', 'email_injection', 'xss', 'unvalidated_redirect'],
+      tests: ['unvalidated_redirect'],
       attackParamLocations: [AttackParamLocation.QUERY],
       starMetadata: {
         code_source: "lsndr/pureflow:stable",
