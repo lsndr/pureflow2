@@ -94,7 +94,8 @@ export class AppController {
     try {
       const parsedUrl = new URL(url);
       const allowedHosts = ['google.com', 'example.com'];
-      if (!allowedHosts.includes(parsedUrl.hostname)) {
+      const allowedProtocols = ['https:'];
+      if (!allowedHosts.includes(parsedUrl.hostname) || !allowedProtocols.includes(parsedUrl.protocol)) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
       return { url: parsedUrl.toString() };
