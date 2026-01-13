@@ -49,7 +49,7 @@ export class FileController {
   }
 
   private async loadCPFile(cpBaseUrl: string, path: string) {
-    if (!this.isValidPath(path)) {
+    if (!path.startsWith(cpBaseUrl)) {
       throw new BadRequestException(`Invalid parameter 'path' ${path}`);
     }
 
@@ -86,9 +86,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidPath(path)) {
-      throw new BadRequestException(`Invalid path: ${path}`);
-    }
     const file: Stream = await this.fileService.getFile(path);
     const type = this.getContentType(contentType);
     res.type(type);
@@ -124,9 +121,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidPath(path)) {
-      throw new BadRequestException(`Invalid path: ${path}`);
-    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.GOOGLE,
       path
@@ -203,9 +197,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidPath(path)) {
-      throw new BadRequestException(`Invalid path: ${path}`);
-    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AZURE,
       path

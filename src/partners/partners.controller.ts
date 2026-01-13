@@ -130,8 +130,9 @@ export class PartnersController {
     this.logger.debug(`Searching partner names by the keyword "${keyword}"`);
 
     try {
-      const xpath = `//partners/partner/name[contains(., '${keyword}')]`;
-      return this.partnersService.getPartnersProperties(xpath);
+      // Use a parameterized approach to construct the XPath expression
+      const xpath = `//partners/partner/name[contains(., $keyword)]`;
+      return this.partnersService.getPartnersPropertiesWithParams(xpath, { keyword });
     } catch (err) {
       const errStr = err.toString();
       const errorMessage =

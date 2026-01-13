@@ -50,6 +50,7 @@ import { JwtProcessorType } from './auth/auth.service';
 import { AppService } from './app.service';
 import { BASIC_USER_INFO, UserDto } from './users/api/UserDto';
 import { SWAGGER_DESC_FIND_USER } from './users/users.controller.swagger.desc';
+import { URL } from 'url';
 
 @Controller('/api')
 @ApiTags('App controller')
@@ -89,12 +90,17 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    // Fix: Validate the URL against an allowlist
-    const allowedUrls = ['https://google.com', 'https://example.com'];
-    if (!allowedUrls.includes(url)) {
-      throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
+    // Fix: Use URL parsing and validation
+    try {
+      const parsedUrl = new URL(url);
+      const allowedHosts = ['google.com', 'example.com'];
+      if (!allowedHosts.includes(parsedUrl.hostname)) {
+        throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
+      }
+      return { url: parsedUrl.toString() };
+    } catch (error) {
+      throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
-    return { url };
   }
 
   @Post('metadata')
