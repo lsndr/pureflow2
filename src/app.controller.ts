@@ -95,10 +95,11 @@ export class AppController {
       const parsedUrl = new URL(url);
       const allowedHosts = ['google.com', 'example.com'];
       const allowedProtocols = ['https:'];
-      if (!allowedHosts.includes(parsedUrl.hostname) || !allowedProtocols.includes(parsedUrl.protocol)) {
+      // Ensure the URL is exactly as expected, without any query parameters
+      if (!allowedHosts.includes(parsedUrl.hostname) || !allowedProtocols.includes(parsedUrl.protocol) || parsedUrl.search) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
-      return { url: parsedUrl.toString() };
+      return { url: parsedUrl.origin }; // Redirect only to the origin
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
