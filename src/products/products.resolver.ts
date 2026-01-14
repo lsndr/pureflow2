@@ -29,8 +29,8 @@ export class ProductsResolver {
   })
   async latestProducts(@Args('limit', { type: () => Number, nullable: true }) limit: number = 10): Promise<Product[]> {
     const maxLimit = 50; // Define a maximum limit to prevent abuse
-    if (limit < 1 || limit > maxLimit) {
-      throw new BadRequestException(`Limit must be between 1 and ${maxLimit}`);
+    if (typeof limit !== 'number' || isNaN(limit) || limit < 1 || limit > maxLimit) {
+      throw new BadRequestException(`Limit must be a number between 1 and ${maxLimit}`);
     }
     const products = await this.productsService.findLatest(limit);
     return products.map((p: Product) => new ProductDto(p));
