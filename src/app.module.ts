@@ -38,7 +38,25 @@ import { ChatModule } from './chat/chat.module';
       useFactory: async (configService: ConfigService) => ({
         autoSchemaFile: true,
         graphiql: false, // Disable GraphiQL to prevent introspection
-        introspection: configService.get('NODE_ENV') !== 'production' // Disable introspection in production
+        introspection: false, // Disable introspection globally
+        context: ({ req }) => {
+          // Implement custom logic to allow introspection only for authorized users
+          const isAuthorized = req.headers['x-api-key'] === configService.get('API_KEY');
+          return { isAuthorized };
+        },
+        validationRules: [
+          (context) => {
+            return {
+              Field: {
+                enter(node) {
+                  if (node.name.value === '__schema' && !context.isAuthorized) {
+                    throw new Error('Introspection is not allowed');
+                  }
+                }
+              }
+            };
+          }
+        ]
       }),
       inject: [ConfigService],
     }),
