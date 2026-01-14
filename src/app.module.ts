@@ -35,8 +35,9 @@ import { ChatModule } from './chat/chat.module';
     HttpClientModule,
     GraphQLModule.forRoot<MercuriusDriverConfig>({
       driver: MercuriusDriver,
-      graphiql: true,
-      autoSchemaFile: true
+      graphiql: false, // Disable GraphiQL in production
+      autoSchemaFile: true,
+      introspection: process.env.NODE_ENV !== 'production' // Disable introspection in production
     }),
     PartnersModule,
     EmailModule,
