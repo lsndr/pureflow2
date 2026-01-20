@@ -63,13 +63,7 @@ export class PartnersService {
     xpathExpression: string
   ): SelectReturnType {
     const partnersXMLObj = this.getPartnersXMLObj();
-    // Use a safe method to evaluate XPath expressions
-    try {
-      return xpath.select(xpathExpression, partnersXMLObj);
-    } catch (error) {
-      this.logger.error(`Invalid XPath expression: ${xpathExpression}`, error);
-      return [];
-    }
+    return xpath.select(xpathExpression, partnersXMLObj);
   }
 
   private getFormattedXMLOutput(xmlNodes): string {

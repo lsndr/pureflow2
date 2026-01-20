@@ -171,8 +171,13 @@ export class AppController {
     type: AppConfig
   })
   getConfig(): AppConfig {
+    // Fix: Do not expose sensitive configuration details
     const config = this.appService.getConfig();
-    return config;
+    return {
+      awsBucket: config.awsBucket,
+      sql: 'REDACTED', // Redact sensitive information
+      googlemaps: 'REDACTED' // Redact sensitive information
+    };
   }
 
   @Get('/secrets')

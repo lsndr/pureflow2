@@ -33,11 +33,6 @@ export class FileService {
         throw new Error('Host not allowed');
       }
 
-      // Ensure the path is not accessing sensitive metadata
-      if (url.hostname === '169.254.169.254') {
-        throw new Error('Access to metadata service is not allowed');
-      }
-
       const content = await this.cloudProviders.get(file);
 
       if (content) {

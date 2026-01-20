@@ -74,10 +74,6 @@ export class FileController {
         throw new Error('Invalid URL protocol');
       }
       // Add more validation logic if needed, such as checking against a whitelist of domains
-      const allowedDomains = ['example.com', 'another-example.com']; // Example whitelist
-      if (!allowedDomains.includes(parsedUrl.hostname)) {
-        throw new Error('Domain not allowed');
-      }
     } catch (error) {
       throw new BadRequestException('Invalid URL');
     }
@@ -152,7 +148,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    this.validateUrl(path);
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.GOOGLE,
       path
