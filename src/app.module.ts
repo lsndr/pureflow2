@@ -37,7 +37,25 @@ import { ChatModule } from './chat/chat.module';
       driver: MercuriusDriver,
       graphiql: false, // Disable GraphiQL
       autoSchemaFile: true,
-      introspection: false // Disable introspection
+      introspection: false, // Disable introspection
+      context: ({ request }) => {
+        // Example of adding authentication check
+        if (!request.headers['x-auth-token']) {
+          throw new Error('Unauthorized');
+        }
+        return { user: request.headers['x-auth-token'] };
+      },
+      validationRules: [
+        (context) => ({
+          Field: {
+            enter(node) {
+              if (node.name.value.startsWith('__')) {
+                throw new Error('Introspection is not allowed');
+              }
+            }
+          }
+        })
+      ]
     }),
     PartnersModule,
     EmailModule,

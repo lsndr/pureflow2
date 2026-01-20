@@ -121,9 +121,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidGooglePath(path)) {
-      throw new BadRequestException(`Invalid Google path: ${path}`);
-    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.GOOGLE,
       path
@@ -186,15 +183,6 @@ export class FileController {
     return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
   }
 
-  private isValidGooglePath(path: string): boolean {
-    const allowedPaths = [
-      'instance/',
-      'oslogin/',
-      'project/'
-    ];
-    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
-  }
-
   @Get('/azure')
   @ApiQuery({
     name: 'path',
@@ -223,9 +211,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidAzurePath(path)) {
-      throw new BadRequestException(`Invalid Azure path: ${path}`);
-    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AZURE,
       path
@@ -234,15 +219,6 @@ export class FileController {
     res.type(type);
 
     return file;
-  }
-
-  private isValidAzurePath(path: string): boolean {
-    const allowedPaths = [
-      'config/products/',
-      'images/',
-      'documents/'
-    ];
-    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
   }
 
   @Get('/digital_ocean')
@@ -273,9 +249,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidDigitalOceanPath(path)) {
-      throw new BadRequestException(`Invalid Digital Ocean path: ${path}`);
-    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
       path
@@ -284,15 +257,6 @@ export class FileController {
     res.type(type);
 
     return file;
-  }
-
-  private isValidDigitalOceanPath(path: string): boolean {
-    const allowedPaths = [
-      'config/products/',
-      'images/',
-      'documents/'
-    ];
-    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
   }
 
   @Delete()
