@@ -48,14 +48,39 @@ export class FileController {
     }
   }
 
-  private async loadCPFile(cpBaseUrl: string, path: string) {
-    if (!path.startsWith(cpBaseUrl)) {
-      throw new BadRequestException(`Invalid paramater 'path' ${path}`);
+  private async loadCPFile(cpBaseUrl: string, filePath: string) {
+    if (!filePath.startsWith(cpBaseUrl)) {
+      throw new BadRequestException(`Invalid parameter 'path' ${filePath}`);
     }
 
-    const file: Stream = await this.fileService.getFile(path);
+    const file: Stream = await this.fileService.getFile(filePath);
 
     return file;
+  }
+
+  private validateFilePath(filePath: string) {
+    const baseDir = path.resolve('config/products/crystals'); // Base directory for files
+    const resolvedPath = path.resolve(baseDir, filePath);
+
+    if (!resolvedPath.startsWith(baseDir)) {
+      throw new BadRequestException('Invalid file path');
+    }
+  }
+
+  private validateUrl(url: string) {
+    try {
+      const parsedUrl = new URL(url);
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        throw new Error('Invalid URL protocol');
+      }
+      // Add more validation logic if needed, such as checking against a whitelist of domains
+      const allowedDomains = ['example.com', 'another-example.com']; // Example whitelist
+      if (!allowedDomains.includes(parsedUrl.hostname)) {
+        throw new Error('Domain not allowed');
+      }
+    } catch (error) {
+      throw new BadRequestException('Invalid URL');
+    }
   }
 
   @Get()
@@ -82,15 +107,21 @@ export class FileController {
     description: SWAGGER_DESC_READ_FILE
   })
   async loadFile(
-    @Query('path') path: string,
+    @Query('path') filePath: string,
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    const file: Stream = await this.fileService.getFile(path);
-    const type = this.getContentType(contentType);
-    res.type(type);
+    try {
+      this.validateFilePath(filePath);
+      const file: Stream = await this.fileService.getFile(filePath);
+      const type = this.getContentType(contentType);
+      res.type(type);
 
-    return file;
+      return file;
+    } catch (err) {
+      this.logger.error(err.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Internal Server Error' });
+    }
   }
 
   @Get('/google')
@@ -121,6 +152,7 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    this.validateUrl(path);
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.GOOGLE,
       path
@@ -197,6 +229,7 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    this.validateUrl(path);
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AZURE,
       path
@@ -235,6 +268,7 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    this.validateUrl(path);
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
       path
@@ -292,7 +326,7 @@ export class FileController {
       }
     } catch (err) {
       this.logger.error(err.message);
-      throw err.message;
+      throw new BadRequestException('Failed to upload file');
     }
   }
 
@@ -322,7 +356,7 @@ export class FileController {
       return stream;
     } catch (err) {
       this.logger.error(err.message);
-      res.status(HttpStatus.NOT_FOUND);
+      res.status(HttpStatus.NOT_FOUND).send({ error: 'File not found' });
     }
   }
 }
