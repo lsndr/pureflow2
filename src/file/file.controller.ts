@@ -50,7 +50,7 @@ export class FileController {
 
   private async loadCPFile(cpBaseUrl: string, path: string) {
     if (!path.startsWith(cpBaseUrl)) {
-      throw new BadRequestException(`Invalid paramater 'path' ${path}`);
+      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
     }
 
     const file: Stream = await this.fileService.getFile(path);
@@ -121,6 +121,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidGooglePath(path)) {
+      throw new BadRequestException('Invalid path parameter');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.GOOGLE,
       path
@@ -159,6 +162,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidAwsPath(path)) {
+      throw new BadRequestException('Invalid path parameter');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AWS,
       path
@@ -197,6 +203,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidAzurePath(path)) {
+      throw new BadRequestException('Invalid path parameter');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AZURE,
       path
@@ -205,6 +214,33 @@ export class FileController {
     res.type(type);
 
     return file;
+  }
+
+  private isValidAzurePath(path: string): boolean {
+    // Implement a whitelist or validation logic for Azure paths
+    const allowedPaths = [
+      '/metadata/instance/compute',
+      '/metadata/instance/network'
+    ];
+    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
+  }
+
+  private isValidAwsPath(path: string): boolean {
+    // Implement a whitelist or validation logic for AWS paths
+    const allowedPaths = [
+      '/latest/meta-data/ami-id',
+      '/latest/meta-data/instance-id'
+    ];
+    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
+  }
+
+  private isValidGooglePath(path: string): boolean {
+    // Implement a whitelist or validation logic for Google paths
+    const allowedPaths = [
+      '/computeMetadata/v1/instance/',
+      '/computeMetadata/v1/project/'
+    ];
+    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
   }
 
   @Get('/digital_ocean')
@@ -235,6 +271,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidDigitalOceanPath(path)) {
+      throw new BadRequestException('Invalid path parameter');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
       path
@@ -243,6 +282,15 @@ export class FileController {
     res.type(type);
 
     return file;
+  }
+
+  private isValidDigitalOceanPath(path: string): boolean {
+    // Implement a whitelist or validation logic for Digital Ocean paths
+    const allowedPaths = [
+      '/v1/metadata/id',
+      '/v1/metadata/hostname'
+    ];
+    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
   }
 
   @Delete()
