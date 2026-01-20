@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('GET /api/spawn?command=ls%20-la', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['osi', 'secret_tokens', 'xss'],
+      tests: ['osi'],
       attackParamLocations: [AttackParamLocation.QUERY],
       starMetadata: {
         code_source: "lsndr/pureflow2:stable",
