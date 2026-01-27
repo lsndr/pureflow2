@@ -33,11 +33,14 @@ import { ChatModule } from './chat/chat.module';
       isGlobal: true
     }),
     HttpClientModule,
-    GraphQLModule.forRoot<MercuriusDriverConfig>({
+    GraphQLModule.forRootAsync<MercuriusDriverConfig>({
       driver: MercuriusDriver,
-      graphiql: false, // Disable GraphiQL to prevent introspection
-      autoSchemaFile: true,
-      introspection: false // Disable introspection to prevent schema exposure
+      useFactory: async (configService: ConfigService) => ({
+        graphiql: false, // Disable GraphiQL to prevent introspection
+        autoSchemaFile: true,
+        introspection: false // Ensure introspection is disabled
+      }),
+      inject: [ConfigService],
     }),
     PartnersModule,
     EmailModule,
