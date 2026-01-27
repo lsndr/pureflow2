@@ -18,6 +18,12 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
+      // Validate URL to prevent SSRF
+      const url = new URL(file);
+      if (!['https:', 'http:'].includes(url.protocol) || !this.isAllowedHost(url.hostname)) {
+        throw new Error('Invalid URL or host not allowed');
+      }
+
       const content = await this.cloudProviders.get(file);
 
       if (content) {
@@ -32,6 +38,11 @@ export class FileService {
 
       return fs.createReadStream(file);
     }
+  }
+
+  private isAllowedHost(hostname: string): boolean {
+    const allowedHosts = ['example.com', 'another-example.com']; // Add allowed hosts here
+    return allowedHosts.includes(hostname);
   }
 
   async deleteFile(file: string): Promise<boolean> {
