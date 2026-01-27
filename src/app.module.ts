@@ -38,7 +38,7 @@ import { ChatModule } from './chat/chat.module';
       useFactory: async (configService: ConfigService) => ({
         graphiql: false, // Disable GraphiQL to prevent introspection
         autoSchemaFile: true,
-        introspection: false // Ensure introspection is disabled
+        introspection: configService.get('NODE_ENV') !== 'production' // Disable introspection in production
       }),
       inject: [ConfigService],
     }),
