@@ -74,6 +74,11 @@ ${xmlNodes.join('\n')}
   }
 
   getPartnersProperties(xpathExpression: string): string {
+    // Validate and sanitize the XPath expression
+    if (!this.isValidXPath(xpathExpression)) {
+      throw new Error('Invalid XPath expression');
+    }
+
     let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
 
     if (!Array.isArray(xmlNodes)) {
@@ -105,5 +110,18 @@ ${xmlNodes.join('\n')}
       this.logger.debug(`Raw xpath xmlNodes value is: ${xmlNodes}`);
       return this.getFormattedXMLOutput(xmlNodes);
     }
+  }
+
+  // Method to validate the XPath expression
+  private isValidXPath(xpath: string): boolean {
+    // Basic validation logic, can be extended
+    const forbiddenPatterns = [
+      /\|/, // disallow union
+      /\//, // disallow direct path
+      /\[.*\]/, // disallow predicates
+      /\(/, // disallow functions
+      /\)/
+    ];
+    return !forbiddenPatterns.some(pattern => pattern.test(xpath));
   }
 }
