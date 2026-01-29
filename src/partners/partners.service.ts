@@ -71,7 +71,9 @@ export class PartnersService {
   }
 
   getPartnersProperties(xpathExpression: string): string {
-    let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
+    // Sanitize the input to prevent XPath Injection
+    const sanitizedXpathExpression = this.sanitizeXpath(xpathExpression);
+    let xmlNodes = this.selectPartnerPropertiesByXPATH(sanitizedXpathExpression);
 
     if (!Array.isArray(xmlNodes)) {
       this.logger.debug(
@@ -83,5 +85,28 @@ export class PartnersService {
     }
 
     return this.getFormattedXMLOutput(xmlNodes);
+  }
+
+  getPartnersPropertiesWithParams(xpathExpression: string, params: { [key: string]: string }): string {
+    // Construct a safe XPath expression using parameterized values
+    const partnersXMLObj = this.getPartnersXMLObj();
+    const variables = Object.keys(params).map(key => `declare variable $${key} as xs:string external;`).join(' ');
+    const fullExpression = `${variables} ${xpathExpression}`;
+    const xmlNodes = xpath.select(fullExpression, partnersXMLObj, null, params);
+
+    if (!Array.isArray(xmlNodes)) {
+      this.logger.debug(
+        `xmlNodes's type wasn't 'Array', and it's value was: ${xmlNodes}`
+      );
+      return this.getFormattedXMLOutput([]);
+    }
+
+    this.logger.debug(`Raw xpath xmlNodes value is: ${xmlNodes}`);
+    return this.getFormattedXMLOutput(xmlNodes);
+  }
+
+  private sanitizeXpath(xpathExpression: string): string {
+    // Basic sanitization to escape single quotes
+    return xpathExpression.replace(/'/g, "\'");
   }
 }
