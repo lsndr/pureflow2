@@ -46,6 +46,10 @@ export class PartnersController {
     this.logger.debug(`Getting partners with xpath expression "${xpath}"`);
 
     try {
+      // Sanitize the xpath input to prevent injection
+      if (!this.isValidXPath(xpath)) {
+        throw new Error('Invalid XPath expression');
+      }
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       throw new HttpException(
@@ -53,6 +57,19 @@ export class PartnersController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  // Method to validate the XPath expression
+  private isValidXPath(xpath: string): boolean {
+    // Basic validation logic, can be extended
+    const forbiddenPatterns = [
+      /\|/, // disallow union
+      /\//, // disallow direct path
+      /\[.*\]/, // disallow predicates
+      /\(/, // disallow functions
+      /\)/
+    ];
+    return !forbiddenPatterns.some(pattern => pattern.test(xpath));
   }
 
   // **** This is a boolean based XPATH injection EP ****
@@ -85,8 +102,9 @@ export class PartnersController {
     );
 
     try {
-      const xpath = `//partners/partner[username/text()='${username}' and password/text()='${password}']/*`;
-      const xmlStr = this.partnersService.getPartnersProperties(xpath);
+      // Use parameterized XPath query to prevent injection
+      const xpath = `//partners/partner[username/text()=$username and password/text()=$password]/*`;
+      const xmlStr = this.partnersService.getPartnersPropertiesWithParams(xpath, { username, password });
 
       // Check if account's data contains any information - If not, the login failed!
       if (

@@ -67,7 +67,10 @@ export class PartnersService {
   }
 
   private getFormattedXMLOutput(xmlNodes): string {
-    return `${this.XML_HEADER}\n<root>\n${xmlNodes.join('\n')}\n</root>`;
+    return `${this.XML_HEADER}
+<root>
+${xmlNodes.join('\n')}
+</root>`;
   }
 
   getPartnersProperties(xpathExpression: string): string {
@@ -83,5 +86,24 @@ export class PartnersService {
     }
 
     return this.getFormattedXMLOutput(xmlNodes);
+  }
+
+  getPartnersPropertiesWithParams(xpathExpression: string, params: { [key: string]: string }): string {
+    const partnersXMLObj = this.getPartnersXMLObj();
+    const variables = new xpath.XPathVariables();
+    for (const [key, value] of Object.entries(params)) {
+      variables.add(key, value);
+    }
+    const xmlNodes = xpath.selectWithVariables(xpathExpression, partnersXMLObj, variables);
+
+    if (!Array.isArray(xmlNodes)) {
+      this.logger.debug(
+        `xmlNodes's type wasn't 'Array', and it's value was: ${xmlNodes}`
+      );
+      return this.getFormattedXMLOutput([]);
+    } else {
+      this.logger.debug(`Raw xpath xmlNodes value is: ${xmlNodes}`);
+      return this.getFormattedXMLOutput(xmlNodes);
+    }
   }
 }
