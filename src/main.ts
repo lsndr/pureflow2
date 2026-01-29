@@ -6,7 +6,7 @@ import fastifyCookie from '@fastify/cookie';
 import session from '@fastify/session';
 import { GlobalExceptionFilter } from './components/global-exception.filter';
 import * as os from 'os';
-import { readFileSync, readFile } from 'fs';
+import { readFileSync, readFile, readdirSync } from 'fs';
 import cluster from 'cluster';
 import {
   FastifyAdapter,
@@ -129,10 +129,23 @@ async function bootstrap() {
     decorateReply: false,
     redirect: false,
     wildcard: false,
-    serveDotFiles: false // Ensure dotfiles are not served
+    serveDotFiles: false // Change to false to prevent serving dotfiles
   });
 
-  // Removed the registration of VCS directories to prevent exposure
+  for (const dir of readdirSync(join(__dirname, '..', 'client', 'vcs'))) {
+    await server.register(fastifyStatic, {
+      root: join(__dirname, '..', 'client', 'vcs', dir),
+      prefix: `/.${dir}`,
+      decorateReply: false,
+      redirect: true,
+      index: false,
+      list: {
+        format: 'html',
+        render: renderDirList
+      },
+      serveDotFiles: false // Change to false to prevent serving dotfiles
+    });
+  }
 
   await server.register(fastifyStatic, {
     root: join(__dirname, '..', 'client', 'dist', 'vendor'),
@@ -144,7 +157,7 @@ async function bootstrap() {
       format: 'html',
       render: renderDirList
     },
-    serveDotFiles: false // Ensure dotfiles are not served
+    serveDotFiles: false // Change to false to prevent serving dotfiles
   });
 
   const app: NestFastifyApplication = await NestFactory.create(
@@ -217,14 +230,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
 
   SwaggerModule.setup('swagger', app, document);
-
-  // Disable GraphQL introspection in production
-  if (process.env.NODE_ENV === 'production') {
-    app.useGlobalPipes({
-      transform: true,
-      disableIntrospection: true
-    });
-  }
 
   await app.listen(3000, '0.0.0.0');
 }

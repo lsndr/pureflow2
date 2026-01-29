@@ -162,9 +162,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidPath(path)) {
-      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
-    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AWS,
       path
@@ -241,9 +238,6 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    if (!this.isValidPath(path)) {
-      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
-    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
       path
@@ -343,6 +337,11 @@ export class FileController {
       CloudProvidersMetaData.AZURE,
       CloudProvidersMetaData.DIGITAL_OCEAN
     ];
-    return allowedDomains.some(domain => path.startsWith(domain));
+    try {
+      const url = new URL(path);
+      return allowedDomains.some(domain => url.hostname.endsWith(domain));
+    } catch (e) {
+      return false;
+    }
   }
 }

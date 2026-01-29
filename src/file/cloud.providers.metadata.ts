@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { URL } from 'url';
 
 @Injectable()
 export class CloudProvidersMetaData {
@@ -252,14 +253,19 @@ export class CloudProvidersMetaData {
   }
 
   async get(providerUrl: string): Promise<string> {
-    if (providerUrl.startsWith(CloudProvidersMetaData.GOOGLE)) {
+    const url = new URL(providerUrl);
+    if (url.hostname === 'metadata.google.internal') {
       return this.providers.get(CloudProvidersMetaData.GOOGLE);
-    } else if (providerUrl.startsWith(CloudProvidersMetaData.DIGITAL_OCEAN)) {
-      return this.providers.get(CloudProvidersMetaData.DIGITAL_OCEAN);
-    } else if (providerUrl.startsWith(CloudProvidersMetaData.AWS)) {
-      return this.providers.get(CloudProvidersMetaData.AWS);
-    } else if (providerUrl.startsWith(CloudProvidersMetaData.AZURE)) {
-      return this.providers.get(CloudProvidersMetaData.AZURE);
+    } else if (url.hostname === '169.254.169.254') {
+      if (providerUrl.startsWith(CloudProvidersMetaData.AWS)) {
+        return this.providers.get(CloudProvidersMetaData.AWS);
+      } else if (providerUrl.startsWith(CloudProvidersMetaData.AZURE)) {
+        return this.providers.get(CloudProvidersMetaData.AZURE);
+      } else if (providerUrl.startsWith(CloudProvidersMetaData.DIGITAL_OCEAN)) {
+        return this.providers.get(CloudProvidersMetaData.DIGITAL_OCEAN);
+      } else {
+        throw new Error('Invalid provider URL');
+      }
     } else {
       throw new Error('Invalid provider URL');
     }
