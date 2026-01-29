@@ -32,6 +32,7 @@ import {
   SWAGGER_DESC_SAVE_RAW_CONTENT
 } from './file.controller.swagger.desc';
 import { CloudProvidersMetaData } from './cloud.providers.metadata';
+import * as url from 'url';
 
 @Controller('/api/file')
 @ApiTags('Files controller')
@@ -162,6 +163,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidPath(path)) {
+      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AWS,
       path
@@ -238,6 +242,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidPath(path)) {
+      throw new BadRequestException(`Invalid parameter 'path' ${path}`);
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
       path
@@ -330,17 +337,17 @@ export class FileController {
   }
 
   private isValidPath(path: string): boolean {
-    // Implement a whitelist of allowed paths or domains
-    const allowedDomains = [
-      CloudProvidersMetaData.GOOGLE,
-      CloudProvidersMetaData.AWS,
-      CloudProvidersMetaData.AZURE,
-      CloudProvidersMetaData.DIGITAL_OCEAN
-    ];
     try {
-      const url = new URL(path);
-      return allowedDomains.some(domain => url.hostname.endsWith(domain));
-    } catch (e) {
+      const parsedUrl = new url.URL(path);
+      // Implement a whitelist of allowed paths or domains
+      const allowedDomains = [
+        CloudProvidersMetaData.GOOGLE,
+        CloudProvidersMetaData.AWS,
+        CloudProvidersMetaData.AZURE,
+        CloudProvidersMetaData.DIGITAL_OCEAN
+      ];
+      return allowedDomains.includes(parsedUrl.origin);
+    } catch (err) {
       return false;
     }
   }
