@@ -85,7 +85,7 @@ export class PartnersController {
     );
 
     try {
-      const xpath = `//partners/partner[username/text()='${username}' and password/text()='${password}']/*`;
+      const xpath = `//partners/partner[username/text()='${this.escapeXpathValue(username)}' and password/text()='${this.escapeXpathValue(password)}']/*`;
       const xmlStr = this.partnersService.getPartnersProperties(xpath);
 
       // Check if account's data contains any information - If not, the login failed!
@@ -128,7 +128,7 @@ export class PartnersController {
     this.logger.debug(`Searching partner names by the keyword "${keyword}"`);
 
     try {
-      const xpath = `//partners/partner/name[contains(., '${keyword}')]`;
+      const xpath = `//partners/partner/name[contains(., '${this.escapeXpathValue(keyword)}')]`;
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       const errStr = err.toString();
@@ -143,5 +143,10 @@ export class PartnersController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  private escapeXpathValue(value: string): string {
+    // Escape single quotes in XPath values
+    return value.replace(/'/g, "\'");
   }
 }
