@@ -63,7 +63,25 @@ export class PartnersService {
     xpathExpression: string
   ): SelectReturnType {
     const partnersXMLObj = this.getPartnersXMLObj();
+    // Validate and sanitize the XPath expression
+    if (!this.isValidXPath(xpathExpression)) {
+      this.logger.error(`Invalid XPath expression: ${xpathExpression}`);
+      throw new Error('Invalid XPath expression');
+    }
     return xpath.select(xpathExpression, partnersXMLObj);
+  }
+
+  private isValidXPath(xpathExpression: string): boolean {
+    // Basic validation to ensure the XPath does not contain disallowed characters
+    const disallowedPatterns = [
+      /\|/, // Disallow union operator
+      /\[\s*\]/, // Disallow empty predicates
+      /\btext\(\)/, // Disallow text() function
+      /\bcomment\(\)/, // Disallow comment() function
+      /\bprocessing-instruction\(\)/, // Disallow processing-instruction() function
+      /\bnode\(\)/ // Disallow node() function
+    ];
+    return !disallowedPatterns.some((pattern) => pattern.test(xpathExpression));
   }
 
   private getFormattedXMLOutput(xmlNodes): string {
@@ -82,6 +100,31 @@ export class PartnersService {
       this.logger.debug(`Raw xpath xmlNodes value is: ${xmlNodes}`);
     }
 
+    return this.getFormattedXMLOutput(xmlNodes);
+  }
+
+  getPartnersPropertiesWithParams(xpathExpression: string, params: { [key: string]: string }): string {
+    const partnersXMLObj = this.getPartnersXMLObj();
+    const variables = Object.keys(params).map(key => `declare variable $${key} as xs:string external;`).join(' ');
+    const fullExpression = `${variables} ${xpathExpression}`;
+
+    // Validate and sanitize the XPath expression
+    if (!this.isValidXPath(fullExpression)) {
+      this.logger.error(`Invalid XPath expression: ${fullExpression}`);
+      throw new Error('Invalid XPath expression');
+    }
+
+    const context = { variables: params };
+    const xmlNodes = xpath.evaluate(fullExpression, partnersXMLObj, null, xpath.XPathResult.ANY_TYPE, context);
+
+    if (!Array.isArray(xmlNodes)) {
+      this.logger.debug(
+        `xmlNodes's type wasn't 'Array', and it's value was: ${xmlNodes}`
+      );
+      return this.getFormattedXMLOutput([]);
+    }
+
+    this.logger.debug(`Raw xpath xmlNodes value is: ${xmlNodes}`);
     return this.getFormattedXMLOutput(xmlNodes);
   }
 }
