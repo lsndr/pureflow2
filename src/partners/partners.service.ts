@@ -127,4 +127,8 @@ ${xmlNodes.join('\n')}
       /\/\//, // double slashes
       /\[\]/, // empty brackets
       /\'\]/, // single quote followed by bracket
-      /\
+      /\\/ // backslash
+    ];
+    return !forbiddenPatterns.some((pattern) => pattern.test(xpathExpression));
+  }
+}
