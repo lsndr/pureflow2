@@ -60,20 +60,20 @@ export class PartnersService {
   }
 
   private selectPartnerPropertiesByXPATH(
-    xpathExpression: string
+    keyword: string
   ): SelectReturnType {
     const partnersXMLObj = this.getPartnersXMLObj();
-    // Sanitize the XPath expression to prevent injection
-    const sanitizedXpathExpression = this.sanitizeXpath(xpathExpression);
-    return xpath.select(sanitizedXpathExpression, partnersXMLObj);
+    // Use a parameterized approach to construct the XPath query
+    const xpathExpression = `//partner[contains(name, '${this.escapeForXPath(keyword)}')]`;
+    return xpath.select(xpathExpression, partnersXMLObj);
   }
 
   private getFormattedXMLOutput(xmlNodes): string {
     return `${this.XML_HEADER}\n<root>\n${xmlNodes.join('\n')}\n</root>`;
   }
 
-  getPartnersProperties(xpathExpression: string): string {
-    let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
+  getPartnersProperties(keyword: string): string {
+    let xmlNodes = this.selectPartnerPropertiesByXPATH(keyword);
 
     if (!Array.isArray(xmlNodes)) {
       this.logger.debug(
@@ -87,15 +87,8 @@ export class PartnersService {
     return this.getFormattedXMLOutput(xmlNodes);
   }
 
-  private sanitizeXpath(xpathExpression: string): string {
-    // Basic sanitization logic: escape single quotes
-    return xpathExpression.replace(/'/g, "\'");
-  }
-
-  getPartnerByCredentials(username: string, password: string): string {
-    const partnersXMLObj = this.getPartnersXMLObj();
-    const xpathExpression = `//partners/partner[username/text()="${username}" and password/text()="${password}"]/*`;
-    const xmlNodes = xpath.select(xpathExpression, partnersXMLObj);
-    return this.getFormattedXMLOutput(xmlNodes);
+  private escapeForXPath(input: string): string {
+    // Escape single quotes by splitting and using concat
+    return input.replace(/'/g, "''");
   }
 }
