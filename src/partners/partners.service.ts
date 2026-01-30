@@ -71,7 +71,9 @@ export class PartnersService {
   }
 
   getPartnersProperties(xpathExpression: string): string {
-    let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
+    // Sanitize the xpathExpression to prevent XPath Injection
+    const sanitizedXpathExpression = xpathExpression.replace(/['"&<>]/g, '');
+    let xmlNodes = this.selectPartnerPropertiesByXPATH(sanitizedXpathExpression);
 
     if (!Array.isArray(xmlNodes)) {
       this.logger.debug(
