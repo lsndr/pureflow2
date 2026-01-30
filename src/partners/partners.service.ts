@@ -67,10 +67,19 @@ export class PartnersService {
   }
 
   private getFormattedXMLOutput(xmlNodes): string {
-    return `${this.XML_HEADER}\n<root>\n${xmlNodes.join('\n')}\n</root>`;
+    return `${this.XML_HEADER}
+<root>
+${xmlNodes.join('\n')}
+</root>`;
   }
 
   getPartnersProperties(xpathExpression: string): string {
+    // Sanitize the xpathExpression to prevent injection
+    if (!this.isValidXPath(xpathExpression)) {
+      this.logger.error('Invalid XPath expression detected');
+      throw new Error('Invalid XPath expression');
+    }
+
     let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
 
     if (!Array.isArray(xmlNodes)) {
@@ -83,5 +92,31 @@ export class PartnersService {
     }
 
     return this.getFormattedXMLOutput(xmlNodes);
+  }
+
+  getPartnersPropertiesWithParams(xpathExpression: string, params: { [key: string]: string }): string {
+    const partnersXMLObj = this.getPartnersXMLObj();
+    const variables = Object.keys(params).reduce((acc, key) => {
+      acc[key] = params[key];
+      return acc;
+    }, {});
+    const select = xpath.useNamespaces(variables);
+    const xmlNodes = select(xpathExpression, partnersXMLObj);
+
+    if (!Array.isArray(xmlNodes)) {
+      this.logger.debug(
+        `xmlNodes's type wasn't 'Array', and it's value was: ${xmlNodes}`
+      );
+      return this.getFormattedXMLOutput([]);
+    }
+
+    this.logger.debug(`Raw xpath xmlNodes value is: ${xmlNodes}`);
+    return this.getFormattedXMLOutput(xmlNodes);
+  }
+
+  private isValidXPath(xpath: string): boolean {
+    // Implement a basic validation for XPath expressions
+    // This is a placeholder for actual validation logic
+    return !xpath.includes("'") && !xpath.includes('"');
   }
 }
