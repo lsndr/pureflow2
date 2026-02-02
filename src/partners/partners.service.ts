@@ -60,11 +60,12 @@ export class PartnersService {
   }
 
   private selectPartnerPropertiesByXPATH(
-    xpathExpression: string
+    username: string,
+    password: string
   ): SelectReturnType {
     const partnersXMLObj = this.getPartnersXMLObj();
-    // Use a safer method to construct the XPath expression
-    const safeXPathExpression = this.constructSafeXPath(xpathExpression);
+    // Use parameterized XPath query to prevent injection
+    const safeXPathExpression = `//partner[username/text()="${this.escapeXPathValue(username)}" and password/text()="${this.escapeXPathValue(password)}"]`;
     return xpath.select(safeXPathExpression, partnersXMLObj);
   }
 
@@ -72,8 +73,8 @@ export class PartnersService {
     return `${this.XML_HEADER}\n<root>\n${xmlNodes.join('\n')}\n</root>`;
   }
 
-  getPartnersProperties(xpathExpression: string): string {
-    let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
+  getPartnersProperties(username: string, password: string): string {
+    let xmlNodes = this.selectPartnerPropertiesByXPATH(username, password);
 
     if (!Array.isArray(xmlNodes)) {
       this.logger.debug(
@@ -87,11 +88,8 @@ export class PartnersService {
     return this.getFormattedXMLOutput(xmlNodes);
   }
 
-  private constructSafeXPath(xpathExpression: string): string {
-    // Implement a method to safely construct XPath expressions
-    // This is a placeholder for actual logic to escape or parameterize XPath
-    // For demonstration, we will just return the input, but in a real scenario,
-    // you should ensure that the input is properly sanitized or parameterized.
-    return xpathExpression.replace(/'/g, "\'");
+  private escapeXPathValue(value: string): string {
+    // Escape special characters for XPath
+    return value.replace(/"/g, '\"').replace(/'/g, "\'");
   }
 }
