@@ -67,16 +67,14 @@ export class PartnersService {
   }
 
   private getFormattedXMLOutput(xmlNodes): string {
-    return `${this.XML_HEADER}
-<root>
-${xmlNodes.join('\n')}
-</root>`;
+    return `${this.XML_HEADER}\n<root>\n${xmlNodes.join('\n')}\n</root>`;
   }
 
-  getPartnersProperties(xpathExpression: string): string {
-    // Sanitize the input to prevent XPath Injection
-    const sanitizedXpathExpression = this.sanitizeXpath(xpathExpression);
-    let xmlNodes = this.selectPartnerPropertiesByXPATH(sanitizedXpathExpression);
+  getPartnersProperties(keyword: string): string {
+    // Use a parameterized approach to construct the XPath query
+    const sanitizedKeyword = this.sanitizeInput(keyword);
+    const xpathExpression = `//partner[contains(name, '${sanitizedKeyword}')]`;
+    let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
 
     if (!Array.isArray(xmlNodes)) {
       this.logger.debug(
@@ -90,23 +88,8 @@ ${xmlNodes.join('\n')}
     return this.getFormattedXMLOutput(xmlNodes);
   }
 
-  private sanitizeXpath(xpathExpression: string): string {
-    // Basic sanitization to escape single quotes
-    return xpathExpression.replace(/'/g, "\'");
-  }
-
-  getPartnerByCredentials(username: string, password: string): string {
-    const partnersXMLObj = this.getPartnersXMLObj();
-    const xpathExpression = `//partners/partner[username/text()="${username}" and password/text()="${password}"]/*`;
-    const xmlNodes = xpath.select(xpathExpression, partnersXMLObj);
-
-    if (!Array.isArray(xmlNodes)) {
-      this.logger.debug(
-        `xmlNodes's type wasn't 'Array', and it's value was: ${xmlNodes}`
-      );
-      return this.getFormattedXMLOutput([]);
-    }
-
-    return this.getFormattedXMLOutput(xmlNodes);
+  private sanitizeInput(input: string): string {
+    // Allow only alphanumeric characters and spaces
+    return input.replace(/[^a-zA-Z0-9 ]/g, '');
   }
 }
