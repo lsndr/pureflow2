@@ -67,11 +67,16 @@ export class PartnersService {
   }
 
   private getFormattedXMLOutput(xmlNodes): string {
-    return `${this.XML_HEADER}\n<root>\n${xmlNodes.join('\n')}\n</root>`;
+    return `${this.XML_HEADER}
+<root>
+${xmlNodes.join('\n')}
+</root>`;
   }
 
   getPartnersProperties(xpathExpression: string): string {
-    let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
+    // Sanitize the input to prevent XPath Injection
+    const sanitizedXpathExpression = this.sanitizeXpath(xpathExpression);
+    let xmlNodes = this.selectPartnerPropertiesByXPATH(sanitizedXpathExpression);
 
     if (!Array.isArray(xmlNodes)) {
       this.logger.debug(
@@ -80,6 +85,26 @@ export class PartnersService {
       xmlNodes = [];
     } else {
       this.logger.debug(`Raw xpath xmlNodes value is: ${xmlNodes}`);
+    }
+
+    return this.getFormattedXMLOutput(xmlNodes);
+  }
+
+  private sanitizeXpath(xpathExpression: string): string {
+    // Basic sanitization to escape single quotes
+    return xpathExpression.replace(/'/g, "\'");
+  }
+
+  getPartnerByCredentials(username: string, password: string): string {
+    const partnersXMLObj = this.getPartnersXMLObj();
+    const xpathExpression = `//partners/partner[username/text()="${username}" and password/text()="${password}"]/*`;
+    const xmlNodes = xpath.select(xpathExpression, partnersXMLObj);
+
+    if (!Array.isArray(xmlNodes)) {
+      this.logger.debug(
+        `xmlNodes's type wasn't 'Array', and it's value was: ${xmlNodes}`
+      );
+      return this.getFormattedXMLOutput([]);
     }
 
     return this.getFormattedXMLOutput(xmlNodes);
