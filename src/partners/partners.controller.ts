@@ -46,6 +46,10 @@ export class PartnersController {
     this.logger.debug(`Getting partners with xpath expression "${xpath}"`);
 
     try {
+      // Validate and sanitize the xpath input
+      if (!this.isValidXpath(xpath)) {
+        throw new Error('Invalid XPath expression');
+      }
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       throw new HttpException(
@@ -86,6 +90,10 @@ export class PartnersController {
 
     try {
       const xpath = `//partners/partner[username/text()='${username}' and password/text()='${password}']/*`;
+      // Validate and sanitize the xpath input
+      if (!this.isValidXpath(xpath)) {
+        throw new Error('Invalid XPath expression');
+      }
       const xmlStr = this.partnersService.getPartnersProperties(xpath);
 
       // Check if account's data contains any information - If not, the login failed!
@@ -129,6 +137,10 @@ export class PartnersController {
 
     try {
       const xpath = `//partners/partner/name[contains(., '${keyword}')]`;
+      // Validate and sanitize the xpath input
+      if (!this.isValidXpath(xpath)) {
+        throw new Error('Invalid XPath expression');
+      }
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       const errStr = err.toString();
@@ -143,5 +155,12 @@ export class PartnersController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  // Simple validation function for XPath expressions
+  private isValidXpath(xpath: string): boolean {
+    // Basic check to prevent injection
+    // This should be replaced with a more robust validation logic
+    return !xpath.includes("'") && !xpath.includes('"') && !xpath.includes("|") && !xpath.includes("//");
   }
 }
