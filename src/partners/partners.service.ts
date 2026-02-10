@@ -70,7 +70,12 @@ export class PartnersService {
     return `${this.XML_HEADER}\n<root>\n${xmlNodes.join('\n')}\n</root>`;
   }
 
-  getPartnersProperties(xpathExpression: string): string {
+  getPartnersProperties(username: string, password: string): string {
+    // Sanitize inputs to prevent XPath Injection
+    const sanitizedUsername = username.replace(/'/g, "&apos;");
+    const sanitizedPassword = password.replace(/'/g, "&apos;");
+
+    const xpathExpression = `//partners/partner[username/text()='${sanitizedUsername}' and password/text()='${sanitizedPassword}']/*`;
     let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
 
     if (!Array.isArray(xmlNodes)) {
