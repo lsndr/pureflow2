@@ -46,6 +46,10 @@ export class PartnersController {
     this.logger.debug(`Getting partners with xpath expression "${xpath}"`);
 
     try {
+      // Validate and sanitize the xpath input
+      if (!this.isValidXpath(xpath)) {
+        throw new Error('Invalid XPath expression');
+      }
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       throw new HttpException(
@@ -85,8 +89,7 @@ export class PartnersController {
     );
 
     try {
-      const xpath = `//partners/partner[username/text()='${username}' and password/text()='${password}']/*`;
-      const xmlStr = this.partnersService.getPartnersProperties(xpath);
+      const xmlStr = this.partnersService.getPartnersProperties(username, password);
 
       // Check if account's data contains any information - If not, the login failed!
       if (
@@ -129,6 +132,10 @@ export class PartnersController {
 
     try {
       const xpath = `//partners/partner/name[contains(., '${keyword}')]`;
+      // Validate and sanitize the xpath input
+      if (!this.isValidXpath(xpath)) {
+        throw new Error('Invalid XPath expression');
+      }
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       const errStr = err.toString();
@@ -143,5 +150,17 @@ export class PartnersController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  private isValidXpath(xpath: string): boolean {
+    // Basic validation logic for XPath
+    // This should be replaced with a more robust validation mechanism
+    const forbiddenPatterns = [
+      /\|/, // Disallow union
+      /\//, // Disallow direct path
+      /\[.*\]/, // Disallow predicates
+      /\(.*\)/, // Disallow functions
+    ];
+    return !forbiddenPatterns.some((pattern) => pattern.test(xpath));
   }
 }
