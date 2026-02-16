@@ -17,6 +17,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check DockerHub credentials
+        run: |
+          if [ -z "${{ vars.DOCKERHUB_DULL_USER }}" ] || [ -z "${{ secrets.DOCKERHUB_DULL_TOKEN }}" ]; then
+            echo "ERROR: DockerHub credentials are not set. Please configure 'DOCKERHUB_DULL_USER' as a repository variable and 'DOCKERHUB_DULL_TOKEN' as a repository secret." >&2
+            exit 1
+          fi
+
       - name: Login to DockerHub
         run: |
           docker login --username=${{ vars.DOCKERHUB_DULL_USER }} --password=${{ secrets.DOCKERHUB_DULL_TOKEN }}
