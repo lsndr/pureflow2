@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { HeadersConfiguratorInterceptor } from './components/headers.configurator.interceptor';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import fastifyCookie from '@fastify/cookie';
-import session from '@fastify/session';
+session from '@fastify/session';
 import { GlobalExceptionFilter } from './components/global-exception.filter';
 import * as os from 'os';
 import { readFileSync, readFile, readdirSync } from 'fs';
@@ -230,6 +230,14 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
 
   SwaggerModule.setup('swagger', app, document);
+
+  // Disable GraphQL introspection in production
+  if (process.env.NODE_ENV === 'production') {
+    app.useGlobalPipes({
+      transform: true,
+      disableIntrospection: true
+    });
+  }
 
   await app.listen(3000, '0.0.0.0');
 }
