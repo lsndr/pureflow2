@@ -91,6 +91,6 @@ export class PartnersService {
   // Sanitize input to prevent XPath injection
   private sanitizeInput(input: string): string {
     // Remove or escape characters that can alter XPath syntax
-    return input.replace(/['"\]/g, '');
+    return input.replace(/['"\\]/g, '');
   }
 }
