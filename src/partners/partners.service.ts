@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DOMParser } from '@xmldom/xmldom';
-xpath, { SelectReturnType } from 'xpath';
+import xpath, { SelectReturnType } from 'xpath';
 
 @Injectable()
 export class PartnersService {
