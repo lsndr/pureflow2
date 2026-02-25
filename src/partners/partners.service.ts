@@ -60,14 +60,12 @@ export class PartnersService {
   }
 
   private selectPartnerPropertiesByXPATH(
-    xpathExpression: string
+    keyword: string
   ): SelectReturnType {
     const partnersXMLObj = this.getPartnersXMLObj();
-    // Validate the XPath expression to prevent injection
-    if (!this.isValidXPath(xpathExpression)) {
-      this.logger.error(`Invalid XPath expression: ${xpathExpression}`);
-      return [];
-    }
+    // Use a parameterized approach to construct the XPath query
+    const sanitizedKeyword = this.sanitizeInput(keyword);
+    const xpathExpression = `//partner[contains(name, '${sanitizedKeyword}')]`;
     return xpath.select(xpathExpression, partnersXMLObj);
   }
 
@@ -75,8 +73,8 @@ export class PartnersService {
     return `${this.XML_HEADER}\n<root>\n${xmlNodes.join('\n')}\n</root>`;
   }
 
-  getPartnersProperties(xpathExpression: string): string {
-    let xmlNodes = this.selectPartnerPropertiesByXPATH(xpathExpression);
+  getPartnersProperties(keyword: string): string {
+    let xmlNodes = this.selectPartnerPropertiesByXPATH(keyword);
 
     if (!Array.isArray(xmlNodes)) {
       this.logger.debug(
@@ -90,10 +88,9 @@ export class PartnersService {
     return this.getFormattedXMLOutput(xmlNodes);
   }
 
-  // Basic validation for XPath expressions
-  private isValidXPath(xpath: string): boolean {
-    // Implement a basic validation logic or use a library
-    // For demonstration, we assume a simple check
-    return !xpath.includes(' or ') && !xpath.includes(' and ');
+  // Sanitize input to prevent XPath injection
+  private sanitizeInput(input: string): string {
+    // Remove or escape characters that can alter XPath syntax
+    return input.replace(/['"\]/g, '');
   }
 }
