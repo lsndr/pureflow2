@@ -8,7 +8,8 @@ import {
   Logger,
   Put,
   Query,
-  Res
+  Res,
+  InternalServerErrorException
 } from '@nestjs/common';
 import {
   ApiHeader,
@@ -267,7 +268,12 @@ export class FileController {
     description: 'File deleted successfully'
   })
   async deleteFile(@Query('path') path: string): Promise<void> {
-    await this.fileService.deleteFile(path);
+    try {
+      await this.fileService.deleteFile(path);
+    } catch (err) {
+      this.logger.error(err.message);
+      throw new InternalServerErrorException('An error occurred while deleting the file.');
+    }
   }
 
   @Put('raw')
@@ -292,7 +298,7 @@ export class FileController {
       }
     } catch (err) {
       this.logger.error(err.message);
-      throw err.message;
+      throw new InternalServerErrorException('An error occurred while uploading the file.');
     }
   }
 
