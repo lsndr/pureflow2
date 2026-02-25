@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DOMParser } from '@xmldom/xmldom';
-import xpath, { SelectReturnType } from 'xpath';
+xpath, { SelectReturnType } from 'xpath';
 
 @Injectable()
 export class PartnersService {
@@ -91,6 +91,6 @@ export class PartnersService {
   // Sanitize input to prevent XPath injection
   private sanitizeInput(input: string): string {
     // Remove or escape characters that can alter XPath syntax
-    return input.replace(/['"\]/g, '');
+    return input.replace(/['"\\]/g, '');
   }
 }
