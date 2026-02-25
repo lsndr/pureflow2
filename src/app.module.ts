@@ -38,7 +38,19 @@ import { ChatModule } from './chat/chat.module';
       useFactory: async (configService: ConfigService) => ({
         graphiql: false, // Disable GraphiQL
         autoSchemaFile: true,
-        introspection: configService.get<string>('NODE_ENV') !== 'production' // Disable introspection in production
+        introspection: false, // Disable introspection
+        context: ({ req }) => ({
+          headers: req.headers,
+        }),
+        validationRules: [
+          (context) => ({
+            Field(node) {
+              if (node.name.value.startsWith('__')) {
+                throw new Error('Introspection queries are not allowed');
+              }
+            },
+          }),
+        ],
       }),
       inject: [ConfigService],
     }),
