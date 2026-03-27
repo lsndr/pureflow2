@@ -98,7 +98,7 @@ export class AppController {
       if (urlObj.search) {
         throw new HttpException('Redirect URL should not contain query parameters', HttpStatus.BAD_REQUEST);
       }
-      return { url: urlObj.toString() };
+      return { url: urlObj.origin }; // Redirect only to the origin, ignoring path and query
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
