@@ -90,10 +90,15 @@ export class AppController {
     const allowedDomains = ['example.com', 'another-allowed-domain.com'];
     try {
       const urlObj = new URL(url);
-      if (!allowedDomains.includes(urlObj.hostname)) {
+      // Check if the hostname is exactly in the allowed list
+      if (!allowedDomains.some(domain => urlObj.hostname === domain)) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
-      return { url };
+      // Ensure the URL does not contain any query parameters that could be used for open redirect
+      if (urlObj.search) {
+        throw new HttpException('Redirect URL should not contain query parameters', HttpStatus.BAD_REQUEST);
+      }
+      return { url: urlObj.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
