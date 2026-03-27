@@ -45,6 +45,8 @@ FROM node:18-alpine AS production
 
 WORKDIR /usr/src/app
 
+RUN apk add --no-cache wget
+
 COPY --chown=node:node .env ./
 COPY --chown=node:node config ./config
 COPY --chown=node:node keycloak ./keycloak
