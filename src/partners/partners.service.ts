@@ -84,4 +84,33 @@ export class PartnersService {
 
     return this.getFormattedXMLOutput(xmlNodes);
   }
+
+  /**
+   * Authenticates a partner by matching username and password using a
+   * parameterized XPath expression. The credentials are passed as XPath
+   * variable bindings so they are always treated as plain string values and
+   * can never alter the structure of the XPath query.
+   */
+  getPartnerLogin(username: string, password: string): string {
+    const xpathExpression =
+      `//partners/partner[username/text()=$username and password/text()=$password]/*`;
+
+    const partnersXMLObj = this.getPartnersXMLObj();
+    const expression = xpath.parse(xpathExpression);
+    let xmlNodes = expression.select({
+      node: partnersXMLObj as any,
+      variables: { username, password }
+    }) as SelectReturnType;
+
+    if (!Array.isArray(xmlNodes)) {
+      this.logger.debug(
+        `xmlNodes's type wasn't 'Array', and it's value was: ${xmlNodes}`
+      );
+      xmlNodes = [];
+    } else {
+      this.logger.debug(`Raw xpath xmlNodes value is: ${xmlNodes}`);
+    }
+
+    return this.getFormattedXMLOutput(xmlNodes);
+  }
 }

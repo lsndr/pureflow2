@@ -85,8 +85,10 @@ export class PartnersController {
     );
 
     try {
-      const xpath = `//partners/partner[username/text()='${username}' and password/text()='${password}']/*`;
-      const xmlStr = this.partnersService.getPartnersProperties(xpath);
+      // Use the parameterized service method to prevent XPath injection.
+      // username and password are passed as XPath variable bindings, not
+      // embedded directly into the expression string.
+      const xmlStr = this.partnersService.getPartnerLogin(username, password);
 
       // Check if account's data contains any information - If not, the login failed!
       if (
@@ -128,7 +130,12 @@ export class PartnersController {
     this.logger.debug(`Searching partner names by the keyword "${keyword}"`);
 
     try {
-      const xpath = `//partners/partner/name[contains(., '${keyword}')]`;
+      // Sanitize keyword using an allowlist to prevent XPath injection.
+      // Only letters, digits, and spaces are valid in a name search keyword;
+      // all other characters (quotes, brackets, pipes, slashes, etc.) are removed
+      // before the value is embedded in the XPath expression.
+      const sanitizedKeyword = keyword.replace(/[^a-zA-Z0-9 ]/g, '');
+      const xpath = `//partners/partner/name[contains(., '${sanitizedKeyword}')]`;
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       const errStr = err.toString();
