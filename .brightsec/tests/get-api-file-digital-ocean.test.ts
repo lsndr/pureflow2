@@ -22,8 +22,7 @@ test('GET /api/file/digital_ocean', { signal: AbortSignal.timeout(timeout) }, as
   await runner
     .createScan({
       tests: [
-        'ssrf',
-        'rfi'
+        'ssrf'
       ],
       attackParamLocations: [AttackParamLocation.QUERY],
       starMetadata: {

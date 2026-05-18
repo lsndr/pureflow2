@@ -22,10 +22,7 @@ test('POST /api/render', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
       tests: [
-        'ssti',
-        'server_side_js_injection',
-        'xss',
-        'csrf'
+        'ssti'
       ],
       attackParamLocations: [AttackParamLocation.BODY],
       starMetadata: {

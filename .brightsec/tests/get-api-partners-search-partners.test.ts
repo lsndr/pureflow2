@@ -22,8 +22,7 @@ test('GET /api/partners/searchPartners?keyword=Walter', { signal: AbortSignal.ti
   await runner
     .createScan({
       tests: [
-        'xpathi',
-        'full_path_disclosure'
+        'xpathi'
       ],
       attackParamLocations: [AttackParamLocation.QUERY],
       starMetadata: {

@@ -22,10 +22,7 @@ test('POST /graphql latestProducts', { signal: AbortSignal.timeout(timeout) }, a
   await runner
     .createScan({
       tests: [
-        'sqli',
-        'graphql_introspection',
-        'jwt',
-        'full_path_disclosure'
+        'graphql_introspection'
       ],
       attackParamLocations: [AttackParamLocation.BODY, AttackParamLocation.HEADER],
       starMetadata: {

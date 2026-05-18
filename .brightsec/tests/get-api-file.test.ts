@@ -22,10 +22,10 @@ test('GET /api/file', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
       tests: [
-        'lfi',
         'ssrf',
-        'full_path_disclosure',
-        'rfi'
+        'lfi',
+        'rfi',
+        'full_path_disclosure'
       ],
       attackParamLocations: [AttackParamLocation.QUERY],
       starMetadata: {

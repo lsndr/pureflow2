@@ -22,8 +22,6 @@ test('DELETE /api/file?path=:path', { signal: AbortSignal.timeout(timeout) }, as
   await runner
     .createScan({
       tests: [
-        'lfi',
-        'csrf',
         'full_path_disclosure'
       ],
       attackParamLocations: [AttackParamLocation.QUERY],

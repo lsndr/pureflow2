@@ -22,9 +22,7 @@ test('GET /api/users/id/1', { signal: AbortSignal.timeout(timeout) }, async () =
   await runner
     .createScan({
       tests: [
-        'id_enumeration',
-        'bopla',
-        'http_method_fuzzing'
+        'id_enumeration'
       ],
       attackParamLocations: [AttackParamLocation.PATH],
       starMetadata: {

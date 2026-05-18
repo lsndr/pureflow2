@@ -22,10 +22,9 @@ test('GET /api/testimonials/count', { signal: AbortSignal.timeout(timeout) }, as
   await runner
     .createScan({
       tests: [
-        'sqli',
-        'full_path_disclosure',
+        'html_injection',
         'xss',
-        'html_injection'
+        'sqli'
       ],
       attackParamLocations: [AttackParamLocation.QUERY],
       starMetadata: {

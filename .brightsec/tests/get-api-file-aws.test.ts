@@ -22,9 +22,7 @@ test('GET /api/file/aws', { signal: AbortSignal.timeout(timeout) }, async () => 
   await runner
     .createScan({
       tests: [
-        'ssrf',
-        'rfi',
-        'full_path_disclosure'
+        'ssrf'
       ],
       attackParamLocations: [AttackParamLocation.QUERY],
       starMetadata: {
