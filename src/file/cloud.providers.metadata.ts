@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import axios from 'axios';
 
 @Injectable()
 export class CloudProvidersMetaData {
@@ -252,20 +251,16 @@ export class CloudProvidersMetaData {
   }
 
   async get(providerUrl: string): Promise<string> {
-    if (providerUrl.startsWith(CloudProvidersMetaData.GOOGLE)) {
+    if (providerUrl === CloudProvidersMetaData.GOOGLE) {
       return this.providers.get(CloudProvidersMetaData.GOOGLE);
-    } else if (providerUrl.startsWith(CloudProvidersMetaData.DIGITAL_OCEAN)) {
+    } else if (providerUrl === CloudProvidersMetaData.DIGITAL_OCEAN) {
       return this.providers.get(CloudProvidersMetaData.DIGITAL_OCEAN);
-    } else if (providerUrl.startsWith(CloudProvidersMetaData.AWS)) {
+    } else if (providerUrl === CloudProvidersMetaData.AWS) {
       return this.providers.get(CloudProvidersMetaData.AWS);
-    } else if (providerUrl.startsWith(CloudProvidersMetaData.AZURE)) {
+    } else if (providerUrl === CloudProvidersMetaData.AZURE) {
       return this.providers.get(CloudProvidersMetaData.AZURE);
     } else {
-      const { data } = await axios(providerUrl, {
-        timeout: 5000,
-        responseType: 'text'
-      });
-      return data;
+      return null;
     }
   }
 }

@@ -27,6 +27,28 @@ export class PartnersController {
 
   constructor(private readonly partnersService: PartnersService) {}
 
+  /**
+   * Escapes a value for safe embedding inside an XPath string literal.
+   * - No single quotes  → wrap in single quotes: 'value'
+   * - No double quotes  → wrap in double quotes: "value"
+   * - Both quote types  → use concat() to avoid unescapable characters
+   */
+  private escapeXPathString(value: string): string {
+    // Strip null bytes and ASCII control characters that can prematurely
+    // terminate an XPath string literal and allow injection of XPath operators.
+    const sanitized = value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+    if (!sanitized.includes("'")) {
+      return `'${sanitized}'`;
+    } else if (!sanitized.includes('"')) {
+      return `"${sanitized}"`;
+    } else {
+      const parts = sanitized.split("'");
+      const escapedParts = parts.map(part => `'${part}'`);
+      return `concat(${escapedParts.join(`, "'", `)})``;
+    }
+  }
+
   // **** This is a general XPATH injection EP - Will accept anything ****
   @Get('query')
   @ApiQuery({
@@ -85,7 +107,9 @@ export class PartnersController {
     );
 
     try {
-      const xpath = `//partners/partner[username/text()='${username}' and password/text()='${password}']/*`;
+      const safeUsername = this.escapeXPathString(username);
+      const safePassword = this.escapeXPathString(password);
+      const xpath = `//partners/partner[username/text()=${safeUsername} and password/text()=${safePassword}]/*`;
       const xmlStr = this.partnersService.getPartnersProperties(xpath);
 
       // Check if account's data contains any information - If not, the login failed!
@@ -128,7 +152,8 @@ export class PartnersController {
     this.logger.debug(`Searching partner names by the keyword "${keyword}"`);
 
     try {
-      const xpath = `//partners/partner/name[contains(., '${keyword}')]`;
+      const safeKeyword = this.escapeXPathString(keyword);
+      const xpath = `//partners/partner/name[contains(., ${safeKeyword})]`;
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       const errStr = err.toString();

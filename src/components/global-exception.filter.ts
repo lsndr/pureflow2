@@ -9,6 +9,15 @@ import { GqlContextType } from '@nestjs/graphql';
 
 @Catch()
 export class GlobalExceptionFilter extends BaseExceptionFilter {
+  private escapeHtml(unsafe: string): string {
+    return unsafe
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
+  }
+
   public catch(exception: unknown, host: ArgumentsHost) {
     const gql = host.getType<GqlContextType>() === 'graphql';
 
@@ -21,7 +30,7 @@ export class GlobalExceptionFilter extends BaseExceptionFilter {
     }
 
     const unprocessableException = new InternalServerErrorException(
-      { error: (exception as Error).message },
+      { error: this.escapeHtml((exception as Error).message) },
       'An internal error has occurred, and the API was unable to service your request.'
     );
 

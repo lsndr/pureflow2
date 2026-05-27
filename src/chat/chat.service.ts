@@ -37,9 +37,24 @@ export class ChatService {
       );
     }
 
+    // Strip 'system'-role messages from caller-supplied input to prevent prompt
+    // injection. Only 'user' and 'assistant' roles are permitted from external
+    // callers; the 'system' role is a privileged slot that must be controlled
+    // exclusively by the server.
+    const sanitizedMessages: ChatMessage[] = messages.filter(
+      (m) => m.role !== 'system'
+    );
+
+    // Prepend the server-controlled system prompt (when configured) so the
+    // model's behaviour is always governed by the application, not the caller.
+    const systemPromptContent = process.env.CHAT_SYSTEM_PROMPT;
+    const systemMessages: ChatMessage[] = systemPromptContent
+      ? [{ role: 'system', content: systemPromptContent }]
+      : [];
+
     const chatRequest: ChatRequest = {
       model: process.env.CHAT_API_MODEL,
-      messages,
+      messages: [...systemMessages, ...sanitizedMessages],
       max_tokens:
         +process.env.CHAT_API_MAX_TOKENS || DEFAULT_CHAT_API_MAX_TOKENS,
       stream: false,

@@ -118,12 +118,24 @@ export class UsersController {
   @Get('/id/:id')
   @ApiQuery({ name: 'id', example: 1, required: true })
   @SerializeOptions({ groups: [BASIC_USER_INFO] })
+  @UseGuards(AuthGuard)
+  @JwtType(JwtProcessorType.RSA)
   @ApiOperation({
     description: SWAGGER_DESC_FIND_USER
   })
   @ApiOkResponse({
     type: UserDto,
     description: 'Returns basic user info if it exists'
+  })
+  @ApiForbiddenResponse({
+    description: 'invalid credentials',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number' },
+        message: { type: 'string' }
+      }
+    }
   })
   @ApiNotFoundResponse({
     description: 'User not found',
@@ -135,9 +147,18 @@ export class UsersController {
       }
     }
   })
-  async getById(@Param('id') id: number): Promise<UserDto> {
+  async getById(
+    @Param('id') id: number,
+    @Req() req: FastifyRequest
+  ): Promise<UserDto> {
     try {
       this.logger.debug(`Find a user by id: ${id}`);
+      const requestingUser = await this.usersService.findByEmail(
+        this.originEmail(req)
+      );
+      if (requestingUser.id !== Number(id) && !requestingUser.isAdmin) {
+        throw new ForbiddenException();
+      }
       return new UserDto(await this.usersService.findById(id));
     } catch (err) {
       throw new HttpException(err.message, err.status);

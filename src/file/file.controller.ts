@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -48,12 +47,8 @@ export class FileController {
     }
   }
 
-  private async loadCPFile(cpBaseUrl: string, path: string) {
-    if (!path.startsWith(cpBaseUrl)) {
-      throw new BadRequestException(`Invalid paramater 'path' ${path}`);
-    }
-
-    const file: Stream = await this.fileService.getFile(path);
+  private async loadCPFile(cpBaseUrl: string) {
+    const file: Stream = await this.fileService.getCloudProviderFile(cpBaseUrl);
 
     return file;
   }
@@ -94,11 +89,6 @@ export class FileController {
   }
 
   @Get('/google')
-  @ApiQuery({
-    name: 'path',
-    example: 'config/products/crystals/amethyst.jpg',
-    required: true
-  })
   @ApiQuery({ name: 'type', example: 'image/jpg', required: true })
   @ApiHeader({ name: 'accept', example: 'image/jpg', required: true })
   @ApiOkResponse({
@@ -117,13 +107,11 @@ export class FileController {
     description: SWAGGER_DESC_READ_FILE
   })
   async loadGoogleFile(
-    @Query('path') path: string,
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
     const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.GOOGLE,
-      path
+      CloudProvidersMetaData.GOOGLE
     );
     const type = this.getContentType(contentType);
     res.type(type);
@@ -132,11 +120,6 @@ export class FileController {
   }
 
   @Get('/aws')
-  @ApiQuery({
-    name: 'path',
-    example: 'config/products/crystals/amethyst.jpg',
-    required: true
-  })
   @ApiQuery({ name: 'type', example: 'image/jpg', required: true })
   @ApiHeader({ name: 'accept', example: 'image/jpg', required: true })
   @ApiOkResponse({
@@ -155,13 +138,11 @@ export class FileController {
     description: SWAGGER_DESC_READ_FILE
   })
   async loadAwsFile(
-    @Query('path') path: string,
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
     const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.AWS,
-      path
+      CloudProvidersMetaData.AWS
     );
     const type = this.getContentType(contentType);
     res.type(type);
@@ -170,11 +151,6 @@ export class FileController {
   }
 
   @Get('/azure')
-  @ApiQuery({
-    name: 'path',
-    example: 'config/products/crystals/amethyst.jpg',
-    required: true
-  })
   @ApiQuery({ name: 'type', example: 'image/jpg', required: true })
   @ApiHeader({ name: 'accept', example: 'image/jpg', required: true })
   @ApiOkResponse({
@@ -193,13 +169,11 @@ export class FileController {
     description: SWAGGER_DESC_READ_FILE
   })
   async loadAzureFile(
-    @Query('path') path: string,
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
     const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.AZURE,
-      path
+      CloudProvidersMetaData.AZURE
     );
     const type = this.getContentType(contentType);
     res.type(type);
@@ -208,11 +182,6 @@ export class FileController {
   }
 
   @Get('/digital_ocean')
-  @ApiQuery({
-    name: 'path',
-    example: 'config/products/crystals/amethyst.jpg',
-    required: true
-  })
   @ApiQuery({ name: 'type', example: 'image/jpg', required: true })
   @ApiHeader({ name: 'accept', example: 'image/jpg', required: true })
   @ApiOkResponse({
@@ -231,13 +200,11 @@ export class FileController {
     description: SWAGGER_DESC_READ_FILE
   })
   async loadDigitalOceanFile(
-    @Query('path') path: string,
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
     const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.DIGITAL_OCEAN,
-      path
+      CloudProvidersMetaData.DIGITAL_OCEAN
     );
     const type = this.getContentType(contentType);
     res.type(type);
