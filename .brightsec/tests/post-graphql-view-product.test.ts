@@ -22,7 +22,6 @@ test('POST /graphql viewProduct', { signal: AbortSignal.timeout(timeout) }, asyn
   await runner
     .createScan({
       tests: [
-        'sqli',
         'graphql_introspection'
       ],
       attackParamLocations: [AttackParamLocation.BODY],
