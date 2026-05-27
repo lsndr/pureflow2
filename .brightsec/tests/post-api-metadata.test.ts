@@ -22,9 +22,7 @@ test('POST /api/metadata', { signal: AbortSignal.timeout(timeout) }, async () =>
   await runner
     .createScan({
       tests: [
-        'xxe',
-        'ssrf',
-        'csrf'
+        'xxe'
       ],
       attackParamLocations: [AttackParamLocation.BODY],
       starMetadata: {

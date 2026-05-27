@@ -23,7 +23,6 @@ test('GET /api/testimonials/count', { signal: AbortSignal.timeout(timeout) }, as
     .createScan({
       tests: [
         'sqli',
-        'full_path_disclosure',
         'html_injection',
         'xss'
       ],

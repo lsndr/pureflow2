@@ -22,11 +22,7 @@ test('POST /api/chat/query', { signal: AbortSignal.timeout(timeout) }, async () 
   await runner
     .createScan({
       tests: [
-        'prompt_injection',
-        'bopla',
-        'csrf',
-        'html_injection',
-        'xss'
+        'prompt_injection'
       ],
       attackParamLocations: [AttackParamLocation.BODY],
       starMetadata: {

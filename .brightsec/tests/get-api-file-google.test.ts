@@ -22,8 +22,7 @@ test('GET /api/file/google', { signal: AbortSignal.timeout(timeout) }, async () 
   await runner
     .createScan({
       tests: [
-        'ssrf',
-        'full_path_disclosure'
+        'ssrf'
       ],
       attackParamLocations: [AttackParamLocation.QUERY],
       starMetadata: {

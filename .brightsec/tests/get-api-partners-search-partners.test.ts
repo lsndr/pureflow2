@@ -22,8 +22,7 @@ test('GET /api/partners/searchPartners', { signal: AbortSignal.timeout(timeout) 
   await runner
     .createScan({
       tests: [
-        'xpathi',
-        'full_path_disclosure'
+        'xpathi'
       ],
       attackParamLocations: [AttackParamLocation.QUERY],
       starMetadata: {

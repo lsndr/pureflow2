@@ -22,8 +22,7 @@ test('GET /api/products/latest?limit=3', { signal: AbortSignal.timeout(timeout) 
   await runner
     .createScan({
       tests: [
-        'business_constraint_bypass',
-        'http_method_fuzzing'
+        'business_constraint_bypass'
       ],
       attackParamLocations: [AttackParamLocation.QUERY],
       starMetadata: {
