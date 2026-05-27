@@ -19,6 +19,7 @@ import { AppResolver } from './app.resolver';
 import { PartnersModule } from './partners/partners.module';
 import { EmailModule } from './email/email.module';
 import { ChatModule } from './chat/chat.module';
+import { NoSchemaIntrospectionCustomRule } from 'graphql';
 
 @Module({
   imports: [
@@ -37,7 +38,7 @@ import { ChatModule } from './chat/chat.module';
       driver: MercuriusDriver,
       graphiql: false,
       autoSchemaFile: true,
-      introspection: false
+      validationRules: [NoSchemaIntrospectionCustomRule]
     }),
     PartnersModule,
     EmailModule,
