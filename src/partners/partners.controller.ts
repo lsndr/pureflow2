@@ -45,7 +45,7 @@ export class PartnersController {
     } else {
       const parts = sanitized.split("'");
       const escapedParts = parts.map(part => `'${part}'`);
-      return `concat(${escapedParts.join(`, "'", `)})``;
+      return `concat(${escapedParts.join(`, "'", `)})`;
     }
   }
 
